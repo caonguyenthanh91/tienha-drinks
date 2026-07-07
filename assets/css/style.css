@@ -1,0 +1,207 @@
+:root {
+    --brand-50: #edfdf2;
+    --brand-100: #d2f9df;
+    --brand-500: #1f9f52;
+    --brand-600: #15803d;
+    --brand-700: #166534;
+    --text-900: #1f2937;
+    --text-700: #374151;
+    --surface: #ffffff;
+    --bg-soft: #f6fff8;
+}
+
+body {
+    font-family: "Be Vietnam Pro", sans-serif;
+    color: var(--text-900);
+    background: radial-gradient(circle at top left, var(--brand-50), #ffffff 45%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.navbar-brand {
+    font-family: "Montserrat", sans-serif;
+}
+
+.app-navbar {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid #e5efe8;
+}
+
+.brand-logo {
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    color: var(--brand-700);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, #22c55e, #16a34a);
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.16);
+}
+
+.nav-link {
+    color: var(--text-700);
+    font-weight: 500;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    color: var(--brand-600);
+}
+
+.hero-section {
+    background: linear-gradient(120deg, #e4fce9, #f8fff9);
+    padding: 3.5rem 0;
+    border-bottom: 1px solid #d8f2de;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: #dbfce7;
+    color: var(--brand-700);
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.hero-section h1 {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.hero-card {
+    background: var(--surface);
+    border: 1px solid #c9efd4;
+    border-radius: 16px;
+    padding: 1.2rem;
+    box-shadow: 0 14px 25px rgba(21, 128, 61, 0.08);
+}
+
+.section-heading h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.category-card {
+    display: block;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid #dcf4e4;
+    background: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(22, 101, 52, 0.12);
+}
+
+.category-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.product-card img {
+    height: 220px;
+    object-fit: cover;
+}
+
+.product-card h6 {
+    min-height: 44px;
+}
+
+.price-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #9ca3af;
+    font-size: 0.9rem;
+}
+
+.new-price {
+    color: var(--brand-600);
+    font-weight: 700;
+}
+
+.sidebar .sidebar-title {
+    font-weight: 700;
+}
+
+.sidebar-link {
+    color: var(--text-700);
+    text-decoration: none;
+}
+
+.sidebar-link:hover {
+    color: var(--brand-600);
+}
+
+.support-box {
+    background: var(--bg-soft);
+    border: 1px dashed #bfe7cb;
+    border-radius: 12px;
+    padding: 0.9rem;
+}
+
+.site-footer {
+    background: linear-gradient(120deg, #0d4d29, #166534);
+    color: white;
+}
+
+.about-box,
+.tier-card,
+.metric-card {
+    border: 1px solid #d7f2df;
+    border-radius: 12px;
+    background: #fff;
+    padding: 1rem;
+}
+
+.metric-card span {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.metric-card strong {
+    display: block;
+    color: var(--brand-600);
+    font-size: 1.25rem;
+}
+
+.list-check {
+    padding-left: 1rem;
+}
+
+.list-check li {
+    margin-bottom: 0.5rem;
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}
+
+@media (max-width: 991px) {
+    .hero-section {
+        padding: 2.5rem 0;
+    }
+
+    .product-card img {
+        height: 180px;
+    }
+}
