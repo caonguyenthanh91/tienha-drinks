@@ -25,28 +25,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-lg-5">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h4>Thong tin lien he</h4>
-                    <p class="mb-2">Dia chi: Cho Ben Thanh, Quan 1, TP.HCM</p>
-                    <p class="mb-2">Hotline: 0908 903 164</p>
+                    <h4>Thông tin liên hệ</h4>
+                    <p class="mb-2">Địa chỉ: Khu 15, Bình An, Đồng Nai</p>
+                    <p class="mb-2">Hotline: 03 6816 6816</p>
                     <p class="mb-2">Email: hello@tienhadrinks.vn</p>
-                    <p class="mb-0">Gio mo cua: 07:00 - 22:00</p>
+                    <p class="mb-0">Giờ mở cửa: 07:00 - 22:00</p>
                 </div>
             </div>
         </div>
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <h4>Gui yeu cau</h4>
+                    <h4>Gửi yêu cầu</h4>
                     <?php if ($sent): ?>
-                        <div class="alert alert-success">Cam on ban, chung toi se phan hoi som nhat.</div>
+                        <div class="alert alert-success">Cảm ơn bạn, chúng tôi sẽ phản hồi sớm nhất.</div>
                     <?php endif; ?>
                     <form method="post" class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Ho ten</label>
+                            <label class="form-label">Họ tên</label>
                             <input type="text" name="name" class="form-control" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">So dien thoai</label>
+                            <label class="form-label">Số điện thoại</label>
                             <input type="text" name="phone" class="form-control" required>
                         </div>
                         <div class="col-12">
@@ -54,11 +54,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="email" name="email" class="form-control">
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Noi dung</label>
+                            <label class="form-label">Nội dung</label>
                             <textarea name="message" rows="4" class="form-control" required></textarea>
                         </div>
                         <div class="col-12 d-grid d-md-flex justify-content-md-end">
-                            <button class="btn btn-success">Gui thong tin</button>
+                            <button class="btn btn-success">Gửi thông tin</button>
                         </div>
                     </form>
                 </div>

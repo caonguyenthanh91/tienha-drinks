@@ -14,6 +14,7 @@ $allowedPages = [
 	'checkout',
 	'account',
 	'admin',
+	'admin_products',
 ];
 
 $page = $_GET['page'] ?? 'home';
@@ -30,7 +31,7 @@ echo '<main class="main-content py-4">';
 if (is_file($pageFile)) {
 	require $pageFile;
 } else {
-	echo '<div class="container"><div class="alert alert-warning">Trang dang duoc cap nhat.</div></div>';
+	echo '<div class="container"><div class="alert alert-warning">Trang web đang được cập nhật.</div></div>';
 }
 echo '</main>';
 

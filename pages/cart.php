@@ -17,10 +17,10 @@ $items = cart_items();
 $totals = cart_totals();
 ?>
 <div class="container">
-    <h2 class="mb-4">Gio hang</h2>
+    <h2 class="mb-4">Giỏ hàng</h2>
 
     <?php if (!$items): ?>
-        <div class="alert alert-info">Gio hang dang trong. Hay chon mon ban yeu thich.</div>
+        <div class="alert alert-info">Giỏ hàng đang trống. Hãy chọn món bạn yêu thích.</div>
         <a class="btn btn-success" href="<?= e(app_url('index.php?page=products')) ?>">Mua ngay</a>
     <?php else: ?>
         <form method="post">
@@ -28,10 +28,10 @@ $totals = cart_totals();
                 <table class="table align-middle">
                     <thead>
                     <tr>
-                        <th>San pham</th>
-                        <th class="text-end">Gia</th>
-                        <th style="width: 120px;">So luong</th>
-                        <th class="text-end">Tam tinh</th>
+                        <th>Sản phẩm</th>
+                        <th class="text-end">Giá</th>
+                        <th style="width: 120px;">Số lượng</th>
+                        <th class="text-end">Tạm tính</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -51,7 +51,7 @@ $totals = cart_totals();
                             </td>
                             <td class="text-end fw-semibold"><?= e(format_currency($linePrice)) ?></td>
                             <td class="text-end">
-                                <button name="remove" value="<?= (int)$item['product_id'] ?>" class="btn btn-sm btn-outline-danger">Xoa</button>
+                                <button name="remove" value="<?= (int)$item['product_id'] ?>" class="btn btn-sm btn-outline-danger">Xóa</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -63,12 +63,12 @@ $totals = cart_totals();
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between mb-2"><span>Tam tinh</span><strong><?= e(format_currency($totals['subtotal'])) ?></strong></div>
-                            <div class="d-flex justify-content-between mb-2"><span>Van chuyen</span><strong><?= e(format_currency($totals['shipping'])) ?></strong></div>
-                            <div class="d-flex justify-content-between border-top pt-2 mb-3"><span>Tong cong</span><strong class="text-success"><?= e(format_currency($totals['total'])) ?></strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>Tạm tính</span><strong><?= e(format_currency($totals['subtotal'])) ?></strong></div>
+                            <div class="d-flex justify-content-between mb-2"><span>Vận chuyển</span><strong><?= e(format_currency($totals['shipping'])) ?></strong></div>
+                            <div class="d-flex justify-content-between border-top pt-2 mb-3"><span>Tổng cộng</span><strong class="text-success"><?= e(format_currency($totals['total'])) ?></strong></div>
                             <div class="d-grid gap-2">
-                                <button name="update" value="1" class="btn btn-outline-success">Cap nhat gio</button>
-                                <a class="btn btn-success" href="<?= e(app_url('index.php?page=checkout')) ?>">Thanh toan</a>
+                                <button name="update" value="1" class="btn btn-outline-success">Cập nhật giỏ</button>
+                                <a class="btn btn-success" href="<?= e(app_url('index.php?page=checkout')) ?>">Thanh toán</a>
                             </div>
                         </div>
                     </div>

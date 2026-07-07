@@ -5,7 +5,7 @@ $categories = get_categories();
 ?>
 <aside class="sidebar card border-0 shadow-sm">
 	<div class="card-body">
-		<h5 class="sidebar-title">Danh muc</h5>
+		<h5 class="sidebar-title">Danh mục</h5>
 		<ul class="list-unstyled mb-4">
 			<?php foreach ($categories as $category): ?>
 				<li class="mb-2">
@@ -15,9 +15,9 @@ $categories = get_categories();
 		</ul>
 
 		<div class="support-box">
-			<strong>Hotline dat nhanh</strong>
-			<div class="fs-5 fw-bold text-success">0908 903 164</div>
-			<small class="text-muted">Mo cua 07:00 - 22:00 moi ngay</small>
+			<strong>Hotline đặt nhanh</strong>
+			<div class="fs-5 fw-bold text-success">03 6816 6816</div>
+			<small class="text-muted">Mở cửa 07:00 - 22:00 mỗi ngày</small>
 		</div>
 	</div>
 </aside>

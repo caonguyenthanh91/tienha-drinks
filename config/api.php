@@ -15,7 +15,7 @@ try {
 
 		if (!$product) {
 			http_response_code(404);
-			echo json_encode(['success' => false, 'message' => 'Khong tim thay san pham']);
+			echo json_encode(['success' => false, 'message' => 'Không tìm thấy sản phẩm']);
 			exit;
 		}
 
@@ -42,28 +42,28 @@ try {
 
 		if ($id <= 0) {
 			http_response_code(422);
-			echo json_encode(['success' => false, 'message' => 'Du lieu khong hop le']);
+			echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
 			exit;
 		}
 
 		if (!add_to_cart($id, $quantity)) {
 			http_response_code(404);
-			echo json_encode(['success' => false, 'message' => 'San pham khong ton tai']);
+			echo json_encode(['success' => false, 'message' => 'Sản phẩm không tồn tại']);
 			exit;
 		}
 
 		echo json_encode([
 			'success' => true,
-			'message' => 'Da them vao gio hang',
+			'message' => 'Đã thêm vào giỏ hàng',
 			'cart_count' => cart_count(),
 		]);
 		exit;
 	}
 
 	http_response_code(400);
-	echo json_encode(['success' => false, 'message' => 'Action khong duoc ho tro']);
+	echo json_encode(['success' => false, 'message' => 'Thao tác không được hỗ trợ']);
 } catch (Throwable $e) {
 	http_response_code(500);
-	echo json_encode(['success' => false, 'message' => 'Loi he thong', 'debug' => $e->getMessage()]);
+	echo json_encode(['success' => false, 'message' => 'Lỗi hệ thống', 'debug' => $e->getMessage()]);
 }
 

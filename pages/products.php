@@ -20,18 +20,18 @@ $products = get_products($category ?: null, $keyword !== '' ? $keyword : null, $
                             <input type="hidden" name="category" value="<?= e($category) ?>">
                         <?php endif; ?>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" name="q" value="<?= e($keyword) ?>" placeholder="Tim ten mon hoac mo ta...">
+                            <input type="text" class="form-control" name="q" value="<?= e($keyword) ?>" placeholder="Tìm kiếm sản phẩm...">
                         </div>
                         <div class="col-md-4">
                             <select class="form-select" name="sort">
-                                <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Moi nhat</option>
-                                <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Gia tang dan</option>
-                                <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Gia giam dan</option>
-                                <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Ten A-Z</option>
+                                <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Mới nhất</option>
+                                <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Giá tăng dần</option>
+                                <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Giá giảm dần</option>
+                                <option value="name_asc" <?= $sort === 'name_asc' ? 'selected' : '' ?>>Tên A-Z</option>
                             </select>
                         </div>
                         <div class="col-md-2 d-grid">
-                            <button type="submit" class="btn btn-success">Loc</button>
+                            <button type="submit" class="btn btn-success">Lọc</button>
                         </div>
                     </form>
                 </div>
@@ -40,7 +40,7 @@ $products = get_products($category ?: null, $keyword !== '' ? $keyword : null, $
             <div class="row g-4">
                 <?php if (!$products): ?>
                     <div class="col-12">
-                        <div class="alert alert-info">Khong tim thay san pham phu hop.</div>
+                        <div class="alert alert-info">Không tìm thấy sản phẩm phù hợp.</div>
                     </div>
                 <?php endif; ?>
 
@@ -61,7 +61,7 @@ $products = get_products($category ?: null, $keyword !== '' ? $keyword : null, $
                                 </div>
                                 <div class="d-grid gap-2 mt-auto">
                                     <button class="btn btn-outline-success btn-sm" onclick="openQuickView(<?= (int)$product['id'] ?>)">Xem nhanh</button>
-                                    <button class="btn btn-success btn-sm" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">Them gio hang</button>
+                                    <button class="btn btn-success btn-sm" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">Thêm vào giỏ hàng</button>
                                 </div>
                             </div>
                         </div>

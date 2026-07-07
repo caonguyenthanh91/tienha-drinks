@@ -6,7 +6,8 @@ declare(strict_types=1);
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>TienHa Drinks</title>
+	<link rel="icon" type="image/x-icon" href="<?= e(app_url('assets/img/icon.png')) ?>">
+	<title>M&T Quán</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">

@@ -2,11 +2,11 @@
 		<div class="container py-4">
 			<div class="row g-3 align-items-center">
 				<div class="col-md-8">
-					<h6 class="mb-1">TienHa Drinks - Nuoc uong tuoi moi ngay</h6>
-					<p class="mb-0 text-light-emphasis">Dia chi: Cho Ben Thanh, Quan 1, TP.HCM | Email: hello@tienhadrinks.vn</p>
+					<h6 class="mb-1">M&T Quán - Giải khát mỗi ngày</h6>
+					<p class="mb-0 text-light-emphasis">Địa chỉ: Khu 15, Bình An, Đồng Nai | Email: hello@tienhadrinks.vn</p>
 				</div>
 				<div class="col-md-4 text-md-end">
-					<a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-light btn-sm">Lien he hop tac</a>
+					<a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-light btn-sm">Liên hệ hợp tác</a>
 				</div>
 			</div>
 		</div>
@@ -17,14 +17,14 @@
 	<div class="modal-dialog modal-lg modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header border-0">
-				<h5 class="modal-title">Chi tiet san pham</h5>
+				<h5 class="modal-title">Chi tiết sản phẩm</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body" id="productQuickViewBody">
-				Dang tai du lieu...
+				Đang tải dữ liệu...
 			</div>
 			<div class="modal-footer border-0">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Dong</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
 			</div>
 		</div>
 	</div>

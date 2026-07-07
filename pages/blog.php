@@ -5,8 +5,8 @@ $posts = get_blog_posts(12);
 ?>
 <div class="container">
     <div class="section-heading mb-4">
-        <h2>Blog va meo vat</h2>
-        <p class="text-muted mb-0">Cap nhat bai viet ve do uong, uu dai va cach chon nguyen lieu tot cho suc khoe.</p>
+        <h2>Blog và mẹo vặt</h2>
+        <p class="text-muted mb-0">Cập nhật bài viết về đồ uống, ưu đãi và cách chọn nguyên liệu tốt cho sức khỏe.</p>
     </div>
 
     <div class="row g-4">

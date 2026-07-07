@@ -8,21 +8,21 @@ $categories = get_categories();
     <div class="container">
         <div class="row align-items-center g-4">
             <div class="col-lg-7">
-                <span class="hero-badge">Khoanh khac Dang nho</span>
-                <h1>Nuoc uong tuoi ngon, nang luong xanh moi ngay</h1>
-                <p>TienHa Drinks mang den ca phe, nuoc ep va smoothie lam tu trai cay tuoi. Dat nhanh, giao tan noi trong khu vuc noi thanh.</p>
+                <span class="hero-badge">Khoảnh khắc Đáng nhớ</span>
+                <h1>Nước uống tươi ngon, năng lượng xanh mỗi ngày</h1>
+                <p>M&T Quán mang đến cà phê, nước ép và smoothie làm từ trái cây tươi. Đặt nhanh, giao tận nơi trong khu vực nội thành.</p>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-success btn-lg">Kham pha menu</a>
-                    <a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-success btn-lg">Lien he ngay</a>
+                    <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-success btn-lg">Khám phá Menu</a>
+                    <a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-success btn-lg">Liên hệ ngay</a>
                 </div>
             </div>
             <div class="col-lg-5">
                 <div class="hero-card">
-                    <h4>Uu dai hom nay</h4>
+                    <h4>Ưu đãi hôm nay</h4>
                     <ul>
-                        <li>Giam 15% cho don dau tien.</li>
-                        <li>Free ship cho don tu 300.000 VND.</li>
-                        <li>Tang 2x diem thuong cho thanh vien moi.</li>
+                        <li>Giảm 15% cho đơn đầu tiên.</li>
+                        <li>Free ship cho đơn từ 300.000 VND.</li>
+                        <li>Tặng 2x điểm thưởng cho thành viên mới.</li>
                     </ul>
                 </div>
             </div>
@@ -32,8 +32,8 @@ $categories = get_categories();
 
 <section class="container mt-5">
     <div class="section-heading d-flex justify-content-between align-items-center mb-3">
-        <h2>Danh muc noi bat</h2>
-        <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-sm btn-outline-success">Xem tat ca</a>
+        <h2>Danh mục nổi bật</h2>
+        <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-sm btn-outline-success">Xem tất cả</a>
     </div>
     <div class="row g-3">
         <?php foreach ($categories as $category): ?>
@@ -50,7 +50,7 @@ $categories = get_categories();
 
 <section class="container mt-5">
     <div class="section-heading d-flex justify-content-between align-items-center mb-3">
-        <h2>San pham noi bat</h2>
+        <h2>Sản phẩm nổi bật</h2>
     </div>
     <div class="row g-4">
         <?php foreach ($featuredProducts as $product): ?>
@@ -69,7 +69,7 @@ $categories = get_categories();
                         </div>
                         <div class="d-grid gap-2 mt-auto">
                             <button class="btn btn-outline-success btn-sm" onclick="openQuickView(<?= (int)$product['id'] ?>)">Xem nhanh</button>
-                            <button class="btn btn-success btn-sm" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">Them gio hang</button>
+                            <button class="btn btn-success btn-sm" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">Thêm giỏ hàng</button>
                         </div>
                     </div>
                 </div>

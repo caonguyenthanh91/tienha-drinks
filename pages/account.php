@@ -10,13 +10,13 @@ $orders = db()->query('SELECT order_code, status, final_total, created_at FROM o
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h4>Tai khoan</h4>
+                    <h4>Tài khoản</h4>
                     <?php if ($customer): ?>
                         <p class="mb-1"><strong><?= e($customer['full_name']) ?></strong></p>
                         <p class="mb-1 text-muted"><?= e($customer['email']) ?></p>
                         <p class="mb-1 text-muted"><?= e($customer['phone']) ?></p>
-                        <p class="mb-0">Hang hien tai: <span class="badge text-bg-success"><?= e($customer['tier_name'] ?? 'Mac dinh') ?></span></p>
-                        <p class="mb-0">Diem tich luy: <strong><?= (int)$customer['points'] ?></strong></p>
+                        <p class="mb-0">Hạng hiện tại: <span class="badge text-bg-success"><?= e($customer['tier_name'] ?? 'Mặc định') ?></span></p>
+                        <p class="mb-0">Điểm tích lũy: <strong><?= (int)$customer['points'] ?></strong></p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -24,11 +24,11 @@ $orders = db()->query('SELECT order_code, status, final_total, created_at FROM o
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
-                    <h5>Lich su don hang</h5>
+                    <h5>Lịch sử đơn hàng</h5>
                     <div class="table-responsive">
                         <table class="table table-sm align-middle">
                             <thead>
-                            <tr><th>Ma don</th><th>Trang thai</th><th class="text-end">Tong tien</th><th>Ngay tao</th></tr>
+                            <tr><th>Mã đơn</th><th>Trạng thái</th><th class="text-end">Tổng tiền</th><th>Ngày tạo</th></tr>
                             </thead>
                             <tbody>
                             <?php foreach ($orders as $order): ?>
@@ -47,14 +47,14 @@ $orders = db()->query('SELECT order_code, status, final_total, created_at FROM o
 
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <h5>Cac hang thanh vien</h5>
+                    <h5>Các hạng thành viên</h5>
                     <div class="row g-3">
                         <?php foreach ($tiers as $tier): ?>
                             <div class="col-md-4">
                                 <div class="tier-card">
                                     <h6><?= e($tier['name']) ?></h6>
-                                    <p class="small mb-1">Moc chi tieu: <?= e(format_currency((float)$tier['min_spending'])) ?></p>
-                                    <p class="small mb-0">Quyen loi: <?= e($tier['benefits']) ?></p>
+                                    <p class="small mb-1">Mốc chi tiêu: <?= e(format_currency((float)$tier['min_spending'])) ?></p>
+                                    <p class="small mb-0">Quyền lợi: <?= e($tier['benefits']) ?></p>
                                 </div>
                             </div>
                         <?php endforeach; ?>

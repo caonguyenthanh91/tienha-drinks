@@ -6,12 +6,15 @@ $recentOrders = db()->query('SELECT order_code, customer_name, final_total, stat
 $products = db()->query('SELECT p.id, p.name, p.price, p.sale_price, p.stock, c.name AS category_name FROM products p INNER JOIN categories c ON c.id = p.category_id ORDER BY p.id DESC LIMIT 8')->fetchAll();
 ?>
 <div class="container">
-    <h2 class="mb-4">Bang dieu khien quan tri</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <h2 class="mb-0">Bảng điều khiển quản trị</h2>
+        <a class="btn btn-success" href="<?= e(app_url('index.php?page=admin_products')) ?>">Thêm/Cập nhật sản phẩm</a>
+    </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-3"><div class="metric-card"><span>San pham</span><strong><?= (int)$overview['total_products'] ?></strong></div></div>
-        <div class="col-md-3"><div class="metric-card"><span>Don hang</span><strong><?= (int)$overview['total_orders'] ?></strong></div></div>
-        <div class="col-md-3"><div class="metric-card"><span>Khach hang</span><strong><?= (int)$overview['total_customers'] ?></strong></div></div>
+        <div class="col-md-3"><div class="metric-card"><span>Sản phẩm</span><strong><?= (int)$overview['total_products'] ?></strong></div></div>
+        <div class="col-md-3"><div class="metric-card"><span>Đơn hàng</span><strong><?= (int)$overview['total_orders'] ?></strong></div></div>
+        <div class="col-md-3"><div class="metric-card"><span>Khách hàng</span><strong><?= (int)$overview['total_customers'] ?></strong></div></div>
         <div class="col-md-3"><div class="metric-card"><span>Doanh thu</span><strong><?= e(format_currency((float)$overview['total_revenue'])) ?></strong></div></div>
     </div>
 
@@ -19,10 +22,10 @@ $products = db()->query('SELECT p.id, p.name, p.price, p.sale_price, p.stock, c.
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h5>Don hang gan day</h5>
+                    <h5>Đơn hàng gần đây</h5>
                     <div class="table-responsive">
                         <table class="table table-sm align-middle">
-                            <thead><tr><th>Ma don</th><th>Khach</th><th>Trang thai</th><th class="text-end">Tong</th></tr></thead>
+                            <thead><tr><th>Mã đơn</th><th>Khách</th><th>Trạng thái</th><th class="text-end">Tổng</th></tr></thead>
                             <tbody>
                             <?php foreach ($recentOrders as $order): ?>
                                 <tr>
@@ -41,10 +44,10 @@ $products = db()->query('SELECT p.id, p.name, p.price, p.sale_price, p.stock, c.
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h5>San pham quan ly nhanh</h5>
+                    <h5>Sản phẩm quản lý nhanh</h5>
                     <div class="table-responsive">
                         <table class="table table-sm align-middle">
-                            <thead><tr><th>Ten</th><th>Danh muc</th><th class="text-end">Gia</th><th class="text-end">Ton</th></tr></thead>
+                            <thead><tr><th>Tên</th><th>Danh mục</th><th class="text-end">Giá</th><th class="text-end">Tồn</th></tr></thead>
                             <tbody>
                             <?php foreach ($products as $product): ?>
                                 <tr>
