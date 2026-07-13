@@ -40,15 +40,23 @@ $products = get_products($category ?: null, $keyword !== '' ? $keyword : null, $
             <div class="row g-4">
                 <?php if (!$products): ?>
                     <div class="col-12">
-                        <div class="alert alert-info">Không tìm thấy sản phẩm phù hợp.</div>
+                        <div class="alert alert-info">
+                            <strong>Không tìm thấy sản phẩm phù hợp.</strong> Hãy thử lại với từ khóa khác hoặc quay lại danh mục.
+                        </div>
                     </div>
                 <?php endif; ?>
 
-                <?php foreach ($products as $product): ?>
+                <?php foreach ($products as $index => $product): ?>
                     <?php $price = effective_price($product); ?>
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="product-card card h-100 border-0 shadow-sm">
-                            <img src="<?= e($product['thumbnail']) ?>" class="card-img-top" alt="<?= e($product['name']) ?>">
+                    <div class="col-sm-6 col-xl-4" data-reveal style="--delay: <?= ($index % 3) * 0.08 ?>s">
+                        <div class="product-card card h-100 border-0">
+                            <div class="product-thumb">
+                                <img src="<?= e($product['thumbnail']) ?>" class="card-img-top" alt="<?= e($product['name']) ?>">
+                                <?php if ($product['sale_price']): ?>
+                                    <span class="badge-sale">Giảm giá</span>
+                                <?php endif; ?>
+                                <button class="quick-view-btn" onclick="openQuickView(<?= (int)$product['id'] ?>)">Xem nhanh</button>
+                            </div>
                             <div class="card-body d-flex flex-column">
                                 <small class="text-success fw-semibold"><?= e($product['category_name']) ?></small>
                                 <h6 class="mt-1"><?= e($product['name']) ?></h6>
@@ -59,10 +67,9 @@ $products = get_products($category ?: null, $keyword !== '' ? $keyword : null, $
                                     <?php endif; ?>
                                     <span class="new-price"><?= e(format_currency($price)) ?></span>
                                 </div>
-                                <div class="d-grid gap-2 mt-auto">
-                                    <button class="btn btn-outline-success btn-sm" onclick="openQuickView(<?= (int)$product['id'] ?>)">Xem nhanh</button>
-                                    <button class="btn btn-success btn-sm" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">Thêm vào giỏ hàng</button>
-                                </div>
+                                <button class="btn btn-success btn-sm mt-auto add-cart-btn" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">
+                                    <span>Thêm vào giỏ</span>
+                                </button>
                             </div>
                         </div>
                     </div>

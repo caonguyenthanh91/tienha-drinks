@@ -60,65 +60,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
     }
 }
 ?>
-<div class="container">
-    <h2 class="mb-4">Thanh toán</h2>
+<div class="container" data-reveal>
+    <div class="mb-4">
+        <span class="section-eyebrow">Hoàn thiện đơn hàng</span>
+        <h2>Thanh toán</h2>
+    </div>
 
     <?php if ($message !== ''): ?>
-        <div class="alert alert-info"><?= e($message) ?></div>
+        <div class="alert <?= str_contains($message, 'thành công') ? 'alert-success' : 'alert-danger' ?> alert-dismissible fade show">
+            <?= e($message) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     <?php endif; ?>
 
     <?php if (!$items): ?>
-        <div class="alert alert-warning">Không có sản phẩm trong giỏ hàng.</div>
-        <a class="btn btn-success" href="<?= e(app_url('index.php?page=products')) ?>">Chọn sản phẩm</a>
+        <div class="alert alert-info text-center py-4">
+            <p class="mb-2">Giỏ hàng của bạn đang trống.</p>
+            <a class="btn btn-success" href="<?= e(app_url('index.php?page=products')) ?>">← Quay lại mua hàng</a>
+        </div>
     <?php else: ?>
         <div class="row g-4">
-            <div class="col-lg-7">
-                <div class="card border-0 shadow-sm">
+            <div class="col-lg-7" data-reveal>
+                <div class="card border-0">
                     <div class="card-body">
+                        <h5 class="mb-4">📋 Thông tin giao hàng</h5>
                         <form method="post" class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Người nhận</label>
-                                <input type="text" name="customer_name" class="form-control" required>
+                                <label class="form-label fw-600">Người nhận</label>
+                                <input type="text" name="customer_name" class="form-control" placeholder="Họ và tên" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="text" name="phone" class="form-control" required>
+                                <label class="form-label fw-600">Số điện thoại</label>
+                                <input type="text" name="phone" class="form-control" placeholder="0912345678" required>
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control">
+                                <label class="form-label fw-600">Email</label>
+                                <input type="email" name="email" class="form-control" placeholder="your@email.com">
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Địa chỉ giao hàng</label>
-                                <textarea name="address" class="form-control" rows="3" required></textarea>
+                                <label class="form-label fw-600">Địa chỉ giao hàng</label>
+                                <textarea name="address" class="form-control" rows="3" placeholder="Ví dụ: 123 Nguyễn Huệ, Quận 1, TP.HCM" required></textarea>
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Phương thức thanh toán</label>
+                                <label class="form-label fw-600">Phương thức thanh toán</label>
                                 <select class="form-select" name="payment_method">
-                                    <option value="cod">Thanh toán khi nhận hàng</option>
-                                    <option value="bank_transfer">Chuyển khoản ngân hàng</option>
-                                    <option value="momo">Ví MoMo</option>
+                                    <option value="cod">💵 Thanh toán khi nhận hàng (COD)</option>
+                                    <option value="bank_transfer">🏦 Chuyển khoản ngân hàng</option>
+                                    <option value="momo">📱 Ví MoMo</option>
                                 </select>
                             </div>
-                            <div class="col-12 d-grid d-md-flex justify-content-md-end">
-                                <button class="btn btn-success">Xác nhận đặt hàng</button>
+                            <div class="col-12 pt-3 d-grid d-md-flex justify-content-md-end gap-2">
+                                <a href="<?= e(app_url('index.php?page=cart')) ?>" class="btn btn-outline-secondary">Quay lại</a>
+                                <button type="submit" class="btn btn-success btn-lg">✓ Xác nhận đặt hàng</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-sm">
+            <div class="col-lg-5" data-reveal style="--delay: 0.1s">
+                <div class="card border-0 position-sticky" style="top: 100px;">
                     <div class="card-body">
-                        <h5 class="mb-3">Đơn hàng của bạn</h5>
-                        <?php foreach ($items as $item): ?>
-                            <div class="d-flex justify-content-between mb-2 small">
-                                <span><?= e($item['name']) ?> x <?= (int)$item['quantity'] ?></span>
-                                <span><?= e(format_currency(effective_price($item) * (int)$item['quantity'])) ?></span>
-                            </div>
-                        <?php endforeach; ?>
-                        <hr>
-                        <div class="d-flex justify-content-between"><span>Tổng</span><strong class="text-success"><?= e(format_currency($totals['total'])) ?></strong></div>
+                        <h5 class="mb-3">🛍️ Đơn hàng của bạn</h5>
+                        <div class="mb-3" style="max-height: 300px; overflow-y: auto;">
+                            <?php foreach ($items as $item): ?>
+                                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom small">
+                                    <span><?= e($item['name']) ?> <span class="text-muted">×<?= (int)$item['quantity'] ?></span></span>
+                                    <span><?= e(format_currency(effective_price($item) * (int)$item['quantity'])) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between mb-2 text-muted small">
+                            <span>Vận chuyển:</span>
+                            <span><?= e(format_currency($totals['shipping'])) ?></span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold fs-5 text-success">
+                            <span>Tổng cộng:</span>
+                            <span><?= e(format_currency($totals['total'])) ?></span>
+                        </div>
                     </div>
                 </div>
             </div>

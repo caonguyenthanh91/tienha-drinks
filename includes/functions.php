@@ -39,6 +39,51 @@ function get_featured_products(int $limit = 8): array
 	return $stmt->fetchAll();
 }
 
+function get_best_sellers(int $limit = 8): array
+{
+	$sql = 'SELECT p.*, c.name AS category_name, COALESCE(SUM(oi.quantity), 0) AS sold_qty
+			FROM products p
+			INNER JOIN categories c ON c.id = p.category_id
+			LEFT JOIN order_items oi ON oi.product_id = p.id
+			WHERE p.is_active = 1
+			GROUP BY p.id
+			ORDER BY sold_qty DESC, p.is_featured DESC, p.id DESC
+			LIMIT :limit';
+	$stmt = db()->prepare($sql);
+	$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+	$stmt->execute();
+	return $stmt->fetchAll();
+}
+
+/**
+ * Static customer testimonials. Kept in code because the schema has no reviews table yet.
+ *
+ * @return array<int, array{name:string, role:string, rating:int, content:string}>
+ */
+function get_testimonials(): array
+{
+	return [
+		[
+			'name' => 'Nguyễn Minh Thu',
+			'role' => 'Khách hàng thân thiết',
+			'rating' => 5,
+			'content' => 'Sinh tố bơ xoài béo mịn, giao hàng nhanh và luôn tươi. Mình đặt gần như mỗi sáng đi làm!',
+		],
+		[
+			'name' => 'Trần Hoàng Nam',
+			'role' => 'Dân văn phòng',
+			'rating' => 5,
+			'content' => 'Cà phê đen đá đậm vị, đóng gói chắc chắn. Đặt combo cho cả phòng ai cũng khen.',
+		],
+		[
+			'name' => 'Lê Thu Hà',
+			'role' => 'Food blogger',
+			'rating' => 5,
+			'content' => 'Menu đa dạng, nước ép thanh mát ít ngọt đúng gu mình. Không gian đặt hàng trên web rất dễ dùng.',
+		],
+	];
+}
+
 function get_products(?string $categorySlug = null, ?string $keyword = null, string $sort = 'newest'): array
 {
 	$orderBy = 'p.id DESC';

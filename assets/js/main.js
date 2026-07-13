@@ -67,6 +67,33 @@ async function addToCart(productId, quantity) {
     }
 }
 
+// Reveal elements on scroll (progressive enhancement).
+document.addEventListener("DOMContentLoaded", () => {
+    const revealItems = document.querySelectorAll("[data-reveal]");
+    if (!revealItems.length) {
+        return;
+    }
+
+    if (!("IntersectionObserver" in window)) {
+        revealItems.forEach((el) => el.classList.add("is-visible"));
+        return;
+    }
+
+    const observer = new IntersectionObserver(
+        (entries, obs) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    obs.unobserve(entry.target);
+                }
+            });
+        },
+        { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    revealItems.forEach((el) => observer.observe(el));
+});
+
 function formatVnd(value) {
     return new Intl.NumberFormat("vi-VN").format(Number(value || 0)) + " VND";
 }

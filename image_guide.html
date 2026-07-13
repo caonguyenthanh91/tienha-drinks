@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload & Optimization Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Be Vietnam Pro", sans-serif;
+            background: linear-gradient(135deg, #e4fce9, #f0fdf4);
+            padding: 2rem;
+            color: #1f2937;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #166534; text-align: center; margin-bottom: 0.5rem; }
+        .subtitle { text-align: center; color: #6b7280; margin-bottom: 2rem; }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.1);
+            border-left: 4px solid #15803d;
+        }
+
+        .section h2 {
+            color: #166534;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            color: #15803d;
+            font-size: 1.1rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid #d1f2df;
+            padding: 1rem;
+            text-align: left;
+        }
+
+        th {
+            background: #e4fce9;
+            font-weight: 600;
+            color: #166534;
+        }
+
+        tr:hover { background: #f0fdf4; }
+
+        .code-block {
+            background: #f0fdf4;
+            border-left: 3px solid #15803d;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 0.8rem 0;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+
+        .tool {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.8rem 0;
+            border-left: 3px solid #9ca3af;
+        }
+
+        .tool h4 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool p {
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool a {
+            color: #15803d;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .tool a:hover { text-decoration: underline; }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            background: #d1f2df;
+            border-left: 4px solid #15803d;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+        ul { margin-left: 1.5rem; line-height: 1.8; }
+        li { margin-bottom: 0.5rem; }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📸 Image Upload & Optimization Guide</h1>
+        <p class="subtitle">Standards for M&T Quán product images</p>
+
+        <!-- Current Status -->
+        <div class="section">
+            <h2>✓ Current Status</h2>
+            <div class="success">
+                <strong>13 images downloaded</strong> from external sources<br>
+                Location: <code>assets/img/products/</code><br>
+                Next: Optimize them to recommended sizes
+            </div>
+        </div>
+
+        <!-- Standards -->
+        <div class="section">
+            <h2>📐 Image Size Standards</h2>
+            <p>Use these dimensions when uploading new product/category images:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Dimensions</th>
+                        <th>Aspect Ratio</th>
+                        <th>File Size</th>
+                        <th>Format</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Product</strong></td>
+                        <td><span class="highlight">600 × 450px</span></td>
+                        <td>4:3</td>
+                        <td>50-80 KB</td>
+                        <td>JPEG (85% quality)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Category</strong></td>
+                        <td><span class="highlight">800 × 400px</span></td>
+                        <td>2:1</td>
+                        <td>80-120 KB</td>
+                        <td>JPEG (85% quality)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning">
+                <strong>⚠️ Important:</strong> Current images are 2-4MB each. Optimize them to reduce load time!
+            </div>
+        </div>
+
+        <!-- Tools & Methods -->
+        <div class="section">
+            <h2>🛠️ How to Optimize Images</h2>
+
+            <h3>Option 1: Online Tools (Easy, No Install)</h3>
+
+            <div class="tool">
+                <h4>🌐 TinyPNG / TinyJPG</h4>
+                <p><a href="https://tinypng.com/" target="_blank">tinypng.com</a> - Best compression</p>
+                <p>Steps:</p>
+                <ul>
+                    <li>1. Visit tinypng.com</li>
+                    <li>2. Upload image from <code>assets/img/products/</code></li>
+                    <li>3. Download optimized version</li>
+                    <li>4. Resize to 600×450 (product) or 800×400 (category) using option 2</li>
+                    <li>5. Replace original file</li>
+                </ul>
+            </div>
+
+            <div class="tool">
+                <h4>📐 Resize.Image</h4>
+                <p><a href="https://www.online-convert.com/image-converter" target="_blank">online-convert.com</a> - Resize & compress</p>
+                <p>Or <a href="https://resizeimage.net/" target="_blank">resizeimage.net</a></p>
+            </div>
+
+            <h3>Option 2: Desktop Tools (Professional)</h3>
+
+            <div class="tool">
+                <h4>🎨 ImageMagick (Free, Command Line)</h4>
+                <p><a href="https://imagemagick.org/" target="_blank">imagemagick.org</a></p>
+                <div class="code-block">
+# Product image (600x450)<br>
+convert input.jpg -resize 600x450 -quality 85 product.jpg<br>
+<br>
+# Category image (800x400)<br>
+convert input.jpg -resize 800x400 -quality 85 category.jpg
+                </div>
+            </div>
+
+            <div class="tool">
+                <h4>🖼️ XnConvert (Free, GUI)</h4>
+                <p><a href="https://www.xnview.com/en/xnconvert/" target="_blank">xnview.com</a> - Easy batch processing</p>
+                <p>Supports resize, compress, and batch operations</p>
+            </div>
+
+            <div class="tool">
+                <h4>⚙️ FFmpeg (Free, Command Line)</h4>
+                <p><a href="https://ffmpeg.org/" target="_blank">ffmpeg.org</a></p>
+                <div class="code-block">
+ffmpeg -i input.jpg -vf scale=600:450 -q:v 8 product.jpg
+                </div>
+            </div>
+
+            <h3>Option 3: Code Solution (Advanced)</h3>
+            <p>Use PHP with GD library or Node.js with Sharp:</p>
+            <div class="code-block">
+# Node.js (Recommended for batch)<br>
+npm install sharp<br>
+<br>
+const sharp = require('sharp');<br>
+sharp('input.jpg')<br>
+  .resize(600, 450)<br>
+  .jpeg({ quality: 85 })<br>
+  .toFile('output.jpg');
+            </div>
+        </div>
+
+        <!-- Batch Processing -->
+        <div class="section">
+            <h2>🔄 Batch Optimize (All Images at Once)</h2>
+
+            <h3>Using XnConvert (Easiest):</h3>
+            <ol style="margin-left: 1.5rem; line-height: 2;">
+                <li>Open <strong>XnConvert</strong></li>
+                <li>Add all files from <code>assets/img/products/</code> folder</li>
+                <li>Click <strong>Output</strong> tab</li>
+                <li>Set output folder (same location)</li>
+                <li>Click <strong>Actions</strong> → Add <strong>Resize</strong>:
+                    <ul style="margin-top: 0.5rem;">
+                        <li>For products: 600×450</li>
+                        <li>For categories: 800×400</li>
+                    </ul>
+                </li>
+                <li>Add <strong>JPEG Quality</strong> → 85</li>
+                <li>Click <strong>Convert</strong></li>
+            </ol>
+
+            <h3>Using PowerShell + ImageMagick (Fast):</h3>
+            <div class="code-block">
+# Batch resize all products<br>
+Get-ChildItem "assets/img/products/product_*.jpg" | ForEach-Object {<br>
+&nbsp;&nbsp;convert $_.FullName -resize 600x450 -quality 85 $_.FullName<br>
+}<br>
+<br>
+# Batch resize all categories<br>
+Get-ChildItem "assets/img/products/category_*.jpg" | ForEach-Object {<br>
+&nbsp;&nbsp;convert $_.FullName -resize 800x400 -quality 85 $_.FullName<br>
+}
+            </div>
+        </div>
+
+        <!-- Upload Process -->
+        <div class="section">
+            <h2>📤 Upload New Images (Manual Process)</h2>
+
+            <h3>Steps:</h3>
+            <ol style="margin-left: 1.5rem; line-height: 2;">
+                <li><strong>Prepare image</strong>
+                    <ul>
+                        <li>Size: 600×450 (product) or 800×400 (category)</li>
+                        <li>Format: JPEG</li>
+                        <li>Quality: 85%</li>
+                        <li>File size: 50-80KB</li>
+                    </ul>
+                </li>
+                <li><strong>Upload to</strong> <code>assets/img/products/</code>
+                    <ul>
+                        <li>Name: <code>product_[ID].jpg</code> or <code>category_[ID].jpg</code></li>
+                    </ul>
+                </li>
+                <li><strong>Update database</strong>
+                    <div class="code-block">
+UPDATE products SET thumbnail = '/demo/tienha-drinks/assets/img/products/product_1.jpg' WHERE id = 1;
+                    </div>
+                </li>
+                <li><strong>Clear browser cache</strong> (Ctrl+Shift+Del)</li>
+                <li><strong>Verify</strong> on website</li>
+            </ol>
+        </div>
+
+        <!-- Current File List -->
+        <div class="section">
+            <h2>📁 Current Files (Need Optimization)</h2>
+            <p>Total: 13 images in <code>assets/img/products/</code></p>
+
+            <h3>Products (10):</h3>
+            <ul>
+                <li>product_1.jpg - product_10.jpg</li>
+                <li><span class="highlight">Action:</span> Resize to 600×450, quality 85%</li>
+            </ul>
+
+            <h3>Categories (3):</h3>
+            <ul>
+                <li>category_1.jpg, category_4.jpg, category_5.jpg</li>
+                <li><span class="highlight">Action:</span> Resize to 800×400, quality 85%</li>
+            </ul>
+        </div>
+
+        <!-- Summary -->
+        <div class="section" style="background: linear-gradient(135deg, #e4fce9, #f0fdf4); border-left-color: #22c55e;">
+            <h2>✅ Summary</h2>
+            <div class="success">
+                <ul>
+                    <li>✓ 13 images downloaded to <code>assets/img/products/</code></li>
+                    <li>✓ Database updated with local URLs</li>
+                    <li>⏳ <strong>Next:</strong> Optimize images (resize + compress)</li>
+                    <li>📐 <strong>Use these sizes:</strong> Product 600×450, Category 800×400</li>
+                    <li>💾 <strong>File size:</strong> 50-120KB per image</li>
+                </ul>
+            </div>
+            <p style="margin-top: 1rem;">
+                <a href="/demo/tienha-drinks/index.php?page=home"
+                   style="display: inline-block; padding: 0.8rem 1.5rem; background: #15803d; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                    ← Back to Home
+                </a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
