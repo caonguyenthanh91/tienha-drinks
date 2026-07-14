@@ -221,6 +221,46 @@ function get_customer_tiers(): array
 	return $stmt->fetchAll();
 }
 
+function get_customer_by_phone(string $phone): ?array
+{
+	$cleanPhone = preg_replace('/\s+/', '', $phone);
+	$stmt = db()->prepare('SELECT c.*, ct.id AS tier_id, ct.name AS tier_name, ct.discount_percent, ct.benefits FROM customers c LEFT JOIN customer_tiers ct ON ct.id = c.tier_id WHERE c.phone = :phone LIMIT 1');
+	$stmt->execute([':phone' => $cleanPhone]);
+	$customer = $stmt->fetch();
+	return $customer ?: null;
+}
+
+function get_customer_tier_discount(int $tierId): float
+{
+	if ($tierId <= 0) {
+		return 0.0;
+	}
+	$stmt = db()->prepare('SELECT discount_percent FROM customer_tiers WHERE id = :id LIMIT 1');
+	$stmt->execute([':id' => $tierId]);
+	$tier = $stmt->fetch();
+	return $tier ? (float)($tier['discount_percent'] ?? 0) : 0.0;
+}
+
+function cart_totals_with_discount(float $discount_percent = 0): array
+{
+	$subtotal = 0.0;
+	foreach (cart_items() as $item) {
+		$subtotal += (float)$item['price'] * (int)$item['quantity'];
+	}
+
+	$shipping = $subtotal > 300000 ? 0 : 20000;
+	$discount = ($subtotal + $shipping) * ($discount_percent / 100);
+	$total = max(0, $subtotal + $shipping - $discount);
+
+	return [
+		'subtotal' => $subtotal,
+		'shipping' => (float)$shipping,
+		'discount' => $discount,
+		'discount_percent' => $discount_percent,
+		'total' => $total,
+	];
+}
+
 function get_admin_overview(): array
 {
 	$pdo = db();

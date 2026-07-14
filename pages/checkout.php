@@ -17,7 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
         $pdo->beginTransaction();
 
         try {
-            $customerId = 1;
+            $cleanPhone = preg_replace('/\s+/', '', $phone);
+            $customer = get_customer_by_phone($cleanPhone);
+            $discountPercent = 0;
+            $customerId = null;
+
+            if ($customer) {
+                $customerId = (int)$customer['id'];
+                $discountPercent = (float)($customer['discount_percent'] ?? 0);
+            }
+
+            $totalsWithDiscount = cart_totals_with_discount($discountPercent);
+
             $stmtOrder = $pdo->prepare('INSERT INTO orders (order_code, customer_id, customer_name, customer_phone, customer_email, shipping_address, payment_method, status, subtotal, shipping_fee, discount_amount, final_total, created_at) VALUES (:order_code, :customer_id, :customer_name, :customer_phone, :customer_email, :shipping_address, :payment_method, :status, :subtotal, :shipping_fee, :discount_amount, :final_total, NOW())');
             $orderCode = 'TH' . date('YmdHis') . random_int(10, 99);
             $stmtOrder->execute([
@@ -29,10 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
                 ':shipping_address' => $address,
                 ':payment_method' => $paymentMethod,
                 ':status' => 'pending',
-                ':subtotal' => $totals['subtotal'],
-                ':shipping_fee' => $totals['shipping'],
-                ':discount_amount' => $totals['discount'],
-                ':final_total' => $totals['total'],
+                ':subtotal' => $totalsWithDiscount['subtotal'],
+                ':shipping_fee' => $totalsWithDiscount['shipping'],
+                ':discount_amount' => $totalsWithDiscount['discount'],
+                ':final_total' => $totalsWithDiscount['total'],
             ]);
             $orderId = (int)$pdo->lastInsertId();
 
@@ -91,7 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-600">Số điện thoại</label>
-                                <input type="text" name="phone" class="form-control" placeholder="0912345678" required>
+                                <input type="text" name="phone" id="customerPhone" class="form-control" placeholder="0912345678" required>
+                                <div id="tierDisplay" class="mt-2" style="display: none;">
+                                    <small class="d-block text-success fw-600">
+                                        <span id="tierIcon">⭐</span>
+                                        Hạng: <span id="tierName"></span>
+                                        <span id="discountBadge" class="badge bg-success"></span>
+                                    </small>
+                                </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-600">Email</label>
@@ -134,9 +152,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
                             <span>Vận chuyển:</span>
                             <span><?= e(format_currency($totals['shipping'])) ?></span>
                         </div>
+                        <div id="discountRow" class="d-flex justify-content-between mb-2 text-success small" style="display: none;">
+                            <span>Chiết khấu <span id="discountPercent"></span>:</span>
+                            <span id="discountAmount" class="text-danger">-0 VND</span>
+                        </div>
                         <div class="d-flex justify-content-between fw-bold fs-5 text-success">
                             <span>Tổng cộng:</span>
-                            <span><?= e(format_currency($totals['total'])) ?></span>
+                            <span id="totalPrice"><?= e(format_currency($totals['total'])) ?></span>
                         </div>
                     </div>
                 </div>
@@ -144,3 +166,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+let cartSubtotal = <?= (float)$totals['subtotal'] ?>;
+let shippingFee = <?= (float)$totals['shipping'] ?>;
+let currentDiscount = 0;
+let currentDiscountPercent = 0;
+
+const phoneInput = document.getElementById('customerPhone');
+const tierDisplay = document.getElementById('tierDisplay');
+const discountRow = document.getElementById('discountRow');
+
+if (phoneInput) {
+    let checkTimer;
+    phoneInput.addEventListener('input', function() {
+        clearTimeout(checkTimer);
+        const phone = this.value.trim();
+
+        if (phone.length < 7) {
+            tierDisplay.style.display = 'none';
+            resetDiscount();
+            return;
+        }
+
+        checkTimer = setTimeout(() => checkCustomerTier(phone), 500);
+    });
+}
+
+async function checkCustomerTier(phone) {
+    try {
+        const response = await fetch(`config/api.php?action=check_customer_tier&phone=${encodeURIComponent(phone)}`);
+        const json = await response.json();
+
+        if (json.success && json.tier) {
+            showTier(json.tier);
+            applyDiscount(json.tier.discount_percent || 0);
+        } else {
+            tierDisplay.style.display = 'none';
+            resetDiscount();
+        }
+    } catch (error) {
+        console.error('Error checking tier:', error);
+    }
+}
+
+function showTier(tier) {
+    document.getElementById('tierName').textContent = tier.name || 'Khách hàng';
+    document.getElementById('discountBadge').textContent = tier.discount_percent ? `${tier.discount_percent}% giảm` : '';
+    tierDisplay.style.display = 'block';
+}
+
+function applyDiscount(discountPercent) {
+    currentDiscountPercent = discountPercent || 0;
+    const subtotalWithShip = cartSubtotal + shippingFee;
+    currentDiscount = (subtotalWithShip * currentDiscountPercent) / 100;
+
+    if (currentDiscountPercent > 0) {
+        document.getElementById('discountPercent').textContent = `(${currentDiscountPercent}%)`;
+        document.getElementById('discountAmount').textContent = `-${formatVnd(currentDiscount)}`;
+        discountRow.style.display = 'flex';
+    } else {
+        discountRow.style.display = 'none';
+    }
+
+    updateTotal();
+}
+
+function resetDiscount() {
+    currentDiscount = 0;
+    currentDiscountPercent = 0;
+    discountRow.style.display = 'none';
+    updateTotal();
+}
+
+function updateTotal() {
+    const newTotal = Math.max(0, cartSubtotal + shippingFee - currentDiscount);
+    document.getElementById('totalPrice').textContent = formatVnd(newTotal);
+}
+
+function formatVnd(value) {
+    return new Intl.NumberFormat('vi-VN').format(Number(value || 0)) + ' VND';
+}
+</script>

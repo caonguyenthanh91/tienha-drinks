@@ -60,6 +60,71 @@ try {
 		exit;
 	}
 
+	if ($action === 'migrate_discount' && $_GET['token'] === 'migrate_now_2026') {
+		try {
+			$pdo = db();
+			$stmt = $pdo->query("SHOW COLUMNS FROM customer_tiers LIKE 'discount_percent'");
+			$columnExists = $stmt->fetch();
+
+			if (!$columnExists) {
+				$pdo->exec("ALTER TABLE customer_tiers ADD COLUMN discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0 AFTER min_spending");
+				$pdo->exec("UPDATE customer_tiers SET discount_percent = 0 WHERE name = 'Đồng'");
+				$pdo->exec("UPDATE customer_tiers SET discount_percent = 5 WHERE name = 'Bạc'");
+				$pdo->exec("UPDATE customer_tiers SET discount_percent = 10 WHERE name = 'Vàng'");
+				echo json_encode(['success' => true, 'message' => 'Migration completed']);
+			} else {
+				echo json_encode(['success' => true, 'message' => 'Column already exists']);
+			}
+		} catch (Throwable $e) {
+			http_response_code(500);
+			echo json_encode(['success' => false, 'message' => 'Migration failed: ' . $e->getMessage()]);
+		}
+		exit;
+	}
+
+	if ($action === 'check_customer_tier') {
+		$phone = (string)($_GET['phone'] ?? '');
+		$phone = preg_replace('/\s+/', '', $phone);
+
+		if (strlen($phone) < 7) {
+			echo json_encode([
+				'success' => false,
+				'message' => 'Số điện thoại không hợp lệ',
+				'tier' => null,
+				'discount' => 0,
+			]);
+			exit;
+		}
+
+		$customer = get_customer_by_phone($phone);
+
+		if (!$customer) {
+			echo json_encode([
+				'success' => false,
+				'message' => 'Khách hàng mới',
+				'tier' => null,
+				'discount' => 0,
+			]);
+			exit;
+		}
+
+		$tierId = (int)($customer['tier_id'] ?? 0);
+		$tierName = $customer['tier_name'] ?? 'Khách hàng mới';
+		$discount = (float)($customer['discount_percent'] ?? 0);
+
+		echo json_encode([
+			'success' => true,
+			'message' => 'Tìm thấy hạng thành viên',
+			'tier' => [
+				'id' => $tierId,
+				'name' => $tierName,
+				'discount_percent' => $discount,
+			],
+			'discount' => $discount,
+		]);
+		exit;
+	}
+
 	http_response_code(400);
 	echo json_encode(['success' => false, 'message' => 'Thao tác không được hỗ trợ']);
 } catch (Throwable $e) {

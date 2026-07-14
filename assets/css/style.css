@@ -16,7 +16,7 @@
 body {
     font-family: "Be Vietnam Pro", sans-serif;
     color: var(--text-900);
-    background: radial-gradient(circle at top left, var(--brand-50), #ffffff 45%);
+    background: radial-gradient(circle at top left, var(--brand-50), #ffffff 20%);
 }
 
 h1, h2, h3, h4, h5, h6,
@@ -88,6 +88,23 @@ h1, h2, h3, h4, h5, h6,
 .cart-pill {
     border-radius: 999px;
     font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    white-space: nowrap;
+}
+
+#cartCountBadge {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#toastContainer {
+    z-index: 9999;
 }
 
 /* ============ BUTTONS ============ */
@@ -351,37 +368,30 @@ h1, h2, h3, h4, h5, h6,
 
 .quick-view-btn {
     position: absolute;
-    top: 12px;
+    bottom: 12px;
     left: 12px;
-    border: none;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.92), rgba(21, 128, 61, 0.92));
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 0.5rem 0.9rem;
-    border-radius: 8px;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1.5px solid var(--brand-600);
+    background: rgba(210, 249, 223, 0.5);
+    color: var(--brand-700);
+    font-weight: 500;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
     white-space: nowrap;
     cursor: pointer;
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 16px rgba(21, 128, 61, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transform: scale(0.9) translateY(-8px);
-    opacity: 0;
-    pointer-events: none;
 }
 
 .product-card:hover .quick-view-btn {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    pointer-events: auto;
+    background: var(--brand-100);
+    border-color: var(--brand-500);
+    color: var(--brand-700);
 }
 
 .quick-view-btn:hover {
-    background: linear-gradient(135deg, rgba(22, 101, 52, 0.95), rgba(15, 76, 40, 0.95));
-    box-shadow: 0 8px 24px rgba(21, 128, 61, 0.4);
-    transform: scale(1.05) translateY(0);
+    background: var(--brand-100);
+    border-color: var(--brand-500);
+    color: var(--brand-700);
 }
 
 .product-card h6 {

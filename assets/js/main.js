@@ -52,18 +52,64 @@ async function addToCart(productId, quantity) {
 
         const json = await response.json();
         if (!json.success) {
-            alert(json.message || "Khong the them gio hang");
+            showToast(json.message || "Không thể thêm giỏ hàng", "error");
             return;
         }
 
         const badge = document.getElementById("cartCountBadge");
         if (badge) {
-            badge.textContent = String(json.cart_count || 0);
+            const oldCount = parseInt(badge.textContent) || 0;
+            const newCount = json.cart_count || 0;
+            badge.textContent = String(newCount);
+            animateCartBadge();
         }
 
-        alert("Da them san pham vao gio hang.");
+        showToast("Đã thêm sản phẩm vào giỏ hàng", "success");
     } catch (error) {
-        alert("Co loi xay ra, vui long thu lai.");
+        showToast("Có lỗi xảy ra, vui lòng thử lại", "error");
+    }
+}
+
+function showToast(message, type = "info") {
+    const toastId = "toast-" + Date.now();
+    const bgClass = type === "success" ? "bg-success" : type === "error" ? "bg-danger" : "bg-info";
+
+    const toastEl = document.createElement("div");
+    toastEl.id = toastId;
+    toastEl.className = `toast align-items-center text-white ${bgClass} border-0`;
+    toastEl.setAttribute("role", "alert");
+    toastEl.setAttribute("aria-live", "assertive");
+    toastEl.setAttribute("aria-atomic", "true");
+    toastEl.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${escapeHtml(message)}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+
+    if (!document.getElementById("toastContainer")) {
+        const container = document.createElement("div");
+        container.id = "toastContainer";
+        container.className = "toast-container position-fixed bottom-0 end-0 p-3";
+        document.body.appendChild(container);
+    }
+
+    document.getElementById("toastContainer").appendChild(toastEl);
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+
+    toastEl.addEventListener("hidden.bs.toast", () => {
+        toastEl.remove();
+    });
+}
+
+function animateCartBadge() {
+    const badge = document.getElementById("cartCountBadge");
+    if (badge) {
+        badge.style.transform = "scale(1.3)";
+        setTimeout(() => {
+            badge.style.transform = "scale(1)";
+        }, 200);
     }
 }
 

@@ -76,20 +76,15 @@ $features = [
     </div>
 </section>
 
-<!-- ============ FEATURE STRIP ============ -->
-<section class="container feature-strip" data-reveal>
-    <div class="row g-3">
-        <?php foreach ($features as $feature): ?>
-            <div class="col-6 col-lg-3">
-                <div class="feature-item">
-                    <div class="feature-icon"><?= $feature['icon'] ?></div>
-                    <div>
-                        <h6 class="mb-0"><?= e($feature['title']) ?></h6>
-                        <small class="text-muted"><?= e($feature['desc']) ?></small>
-                    </div>
-                </div>
-            </div>
-        <?php endforeach; ?>
+<!-- ============ CTA ============ -->
+<section class="container mt-5" data-reveal>
+    <div class="cta-banner">
+        <div>
+            <h3 class="mb-1">Sẵn sàng thưởng thức?</h3>
+            <p class="mb-0">Đặt ngay hôm nay — giảm 15% cho đơn hàng đầu tiên & freeship từ 300.000đ.</p>
+        </div>
+        <a href="#" class="btn btn-light btn-lg btn-glow" data-bs-toggle="modal" data-bs-target="#menuModal">Thực đơn</a>
+        <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-light btn-lg btn-glow">Đặt ngay</a>
     </div>
 </section>
 
@@ -188,13 +183,35 @@ $features = [
     </div>
 </section>
 
-<!-- ============ CTA ============ -->
-<section class="container mt-5" data-reveal>
-    <div class="cta-banner">
-        <div>
-            <h3 class="mb-1">Sẵn sàng thưởng thức?</h3>
-            <p class="mb-0">Đặt ngay hôm nay — giảm 15% cho đơn hàng đầu tiên & freeship từ 300.000đ.</p>
-        </div>
-        <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-light btn-lg btn-glow">Đặt hàng ngay</a>
+
+<!-- ============ FEATURE STRIP ============ -->
+<section class="container feature-strip" data-reveal>
+    <div class="row g-3">
+        <?php foreach ($features as $feature): ?>
+            <div class="col-6 col-lg-3">
+                <div class="feature-item">
+                    <div class="feature-icon"><?= $feature['icon'] ?></div>
+                    <div>
+                        <h6 class="mb-0"><?= e($feature['title']) ?></h6>
+                        <small class="text-muted"><?= e($feature['desc']) ?></small>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 </section>
+
+<!-- ============ MENU MODAL ============ -->
+<div class="modal fade" id="menuModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thực đơn M&T Quán</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img src="<?= e(app_url('assets/img/menu.jpg')) ?>" class="w-100" alt="Thực đơn">
+            </div>
+        </div>
+    </div>
+</div>

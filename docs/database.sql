@@ -35,6 +35,7 @@ CREATE TABLE customer_tiers (
 	id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(80) NOT NULL,
 	min_spending DECIMAL(12,2) NOT NULL DEFAULT 0,
+	discount_percent DECIMAL(5,2) NOT NULL DEFAULT 0,
 	benefits VARCHAR(255) NOT NULL,
 	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -196,10 +197,10 @@ CREATE TABLE contact_messages (
 INSERT INTO admins (full_name, email, password_hash, role) VALUES
 ('Quản trị viên', 'admin@tienhadrinks.vn', '$2y$10$abcdefghijklmnopqrstuv', 'super_admin');
 
-INSERT INTO customer_tiers (name, min_spending, benefits) VALUES
-('Đồng', 0, 'Tích 1 điểm/10.000 VND'),
-('Bạc', 2000000, 'Tăng 5% cho đơn từ 200.000 VND'),
-('Vàng', 5000000, 'Tăng 10% + ưu tiên giao hàng');
+INSERT INTO customer_tiers (name, min_spending, discount_percent, benefits) VALUES
+('Đồng', 0, 0, 'Tích 1 điểm/10.000 VND'),
+('Bạc', 2000000, 5, 'Tăng 5% cho đơn từ 200.000 VND'),
+('Vàng', 5000000, 10, 'Tăng 10% + ưu tiên giao hàng');
 
 INSERT INTO customers (full_name, email, phone, password_hash, tier_id, points, total_spending, default_address) VALUES
 ('Nguyễn Minh Thu', 'thu.nguyen@example.com', '0908000001', '$2y$10$abcdefghijklmnopqrstuv', 2, 260, 2850000, '45 Nguyễn Huệ, Q1, TP.HCM'),
