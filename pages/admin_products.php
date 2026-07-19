@@ -20,20 +20,50 @@ $form = [
     'product_id' => $editingProduct ? (int)$editingProduct['id'] : 0,
     'category_id' => $editingProduct ? (int)$editingProduct['category_id'] : (int)($categories[0]['id'] ?? 0),
     'name' => $editingProduct['name'] ?? '',
+    'sku' => $editingProduct['sku'] ?? '',
     'price' => $editingProduct ? (string)$editingProduct['price'] : '',
     'sale_price' => $editingProduct && $editingProduct['sale_price'] !== null ? (string)$editingProduct['sale_price'] : '',
+    'stock' => $editingProduct ? (string)$editingProduct['stock'] : '0',
+    'short_description' => $editingProduct['short_description'] ?? '',
     'description' => $editingProduct['description'] ?? '',
+    'nutrition_info' => $editingProduct['nutrition_info'] ?? '',
+    'is_featured' => $editingProduct ? (int)$editingProduct['is_featured'] : 0,
+    'is_active' => $editingProduct ? (int)$editingProduct['is_active'] : 1,
     'current_thumbnail' => $editingProduct['thumbnail'] ?? '',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $form['action'] = $_POST['action'] ?? 'create';
+
+    if ($form['action'] === 'toggle_active') {
+        $productId = (int)($_POST['product_id'] ?? 0);
+        $nextStatus = (int)($_POST['next_status'] ?? 0) === 1 ? 1 : 0;
+
+        if ($productId > 0) {
+            $stmtToggle = $pdo->prepare('UPDATE products SET is_active = :is_active WHERE id = :id');
+            $stmtToggle->execute([
+                ':is_active' => $nextStatus,
+                ':id' => $productId,
+            ]);
+            $success = $nextStatus === 1 ? 'Đã kích hoạt sản phẩm.' : 'Đã tạm ngưng sản phẩm.';
+        } else {
+            $errors[] = 'Không tìm thấy sản phẩm để đổi trạng thái.';
+        }
+    }
+
+    if ($form['action'] !== 'toggle_active') {
     $form['product_id'] = (int)($_POST['product_id'] ?? 0);
     $form['category_id'] = (int)($_POST['category_id'] ?? 0);
     $form['name'] = trim((string)($_POST['name'] ?? ''));
+    $form['sku'] = trim((string)($_POST['sku'] ?? ''));
     $form['price'] = trim((string)($_POST['price'] ?? ''));
     $form['sale_price'] = trim((string)($_POST['sale_price'] ?? ''));
+    $form['stock'] = trim((string)($_POST['stock'] ?? '0'));
+    $form['short_description'] = trim((string)($_POST['short_description'] ?? ''));
     $form['description'] = trim((string)($_POST['description'] ?? ''));
+    $form['nutrition_info'] = trim((string)($_POST['nutrition_info'] ?? ''));
+    $form['is_featured'] = isset($_POST['is_featured']) ? 1 : 0;
+    $form['is_active'] = isset($_POST['is_active']) ? 1 : 0;
     $form['current_thumbnail'] = trim((string)($_POST['current_thumbnail'] ?? ''));
 
     if ($form['name'] === '') {
@@ -55,6 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($form['sale_price'] !== '' && is_numeric($form['price']) && (float)$form['sale_price'] > (float)$form['price']) {
         $errors[] = 'Giá bán mới nên nhỏ hơn hoặc bằng giá bán cũ.';
+    }
+
+    if ($form['stock'] === '' || !is_numeric($form['stock']) || (int)$form['stock'] < 0) {
+        $errors[] = 'Tồn kho phải là số nguyên không âm.';
+    }
+
+    if ($form['sku'] !== '' && !preg_match('/^[A-Za-z0-9_-]{2,40}$/', $form['sku'])) {
+        $errors[] = 'SKU chỉ gồm chữ, số, dấu gạch ngang hoặc gạch dưới (2-40 ký tự).';
     }
 
     $thumbnailPath = $form['current_thumbnail'] !== '' ? $form['current_thumbnail'] : null;
@@ -91,14 +129,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($errors === []) {
         $price = (float)$form['price'];
         $salePrice = $form['sale_price'] !== '' ? (float)$form['sale_price'] : null;
+        $stock = (int)$form['stock'];
+        $shortDescription = $form['short_description'] !== '' ? $form['short_description'] : null;
         $description = $form['description'] !== '' ? $form['description'] : null;
-        if ($description !== null) {
-            $shortDescription = function_exists('mb_substr')
-                ? mb_substr($description, 0, 255)
-                : substr($description, 0, 255);
-        } else {
-            $shortDescription = null;
-        }
+        $nutritionInfo = $form['nutrition_info'] !== '' ? $form['nutrition_info'] : null;
 
         try {
             if ($form['action'] === 'update' && $form['product_id'] > 0) {
@@ -114,23 +148,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmtUpdate = $pdo->prepare('UPDATE products
                         SET category_id = :category_id,
                             name = :name,
+                            sku = :sku,
                             slug = :slug,
                             price = :price,
                             sale_price = :sale_price,
+                            stock = :stock,
                             thumbnail = :thumbnail,
                             short_description = :short_description,
-                            description = :description
+                            description = :description,
+                            nutrition_info = :nutrition_info,
+                            is_featured = :is_featured,
+                            is_active = :is_active
                         WHERE id = :id');
+
+                    $sku = $form['sku'] !== '' ? strtoupper($form['sku']) : (string)$existing['sku'];
+
+                    $stmtSku = $pdo->prepare('SELECT COUNT(*) FROM products WHERE sku = :sku AND id <> :id');
+                    $stmtSku->execute([':sku' => $sku, ':id' => $form['product_id']]);
+                    if ((int)$stmtSku->fetchColumn() > 0) {
+                        $errors[] = 'SKU đã tồn tại, vui lòng dùng mã khác.';
+                    }
+
+                    if ($errors !== []) {
+                        throw new RuntimeException('validation_failed');
+                    }
 
                     $stmtUpdate->execute([
                         ':category_id' => $form['category_id'],
                         ':name' => $form['name'],
+                        ':sku' => $sku,
                         ':slug' => $slug,
                         ':price' => $price,
                         ':sale_price' => $salePrice,
+                        ':stock' => $stock,
                         ':thumbnail' => $thumbnailPath,
                         ':short_description' => $shortDescription,
                         ':description' => $description,
+                        ':nutrition_info' => $nutritionInfo,
+                        ':is_featured' => $form['is_featured'],
+                        ':is_active' => $form['is_active'],
                         ':id' => $form['product_id'],
                     ]);
 
@@ -140,12 +196,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 $slug = generate_unique_product_slug($pdo, $form['name']);
-                $sku = generate_unique_product_sku($pdo);
+                $sku = $form['sku'] !== '' ? strtoupper($form['sku']) : generate_unique_product_sku($pdo);
+
+                $stmtSku = $pdo->prepare('SELECT COUNT(*) FROM products WHERE sku = :sku');
+                $stmtSku->execute([':sku' => $sku]);
+                if ((int)$stmtSku->fetchColumn() > 0) {
+                    $errors[] = 'SKU đã tồn tại, vui lòng dùng mã khác.';
+                    throw new RuntimeException('validation_failed');
+                }
 
                 $stmtInsert = $pdo->prepare('INSERT INTO products
                     (category_id, name, slug, sku, price, sale_price, stock, thumbnail, short_description, description, nutrition_info, is_featured, is_active)
                     VALUES
-                    (:category_id, :name, :slug, :sku, :price, :sale_price, 0, :thumbnail, :short_description, :description, NULL, 0, 1)');
+                    (:category_id, :name, :slug, :sku, :price, :sale_price, :stock, :thumbnail, :short_description, :description, :nutrition_info, :is_featured, :is_active)');
 
                 $stmtInsert->execute([
                     ':category_id' => $form['category_id'],
@@ -154,9 +217,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':sku' => $sku,
                     ':price' => $price,
                     ':sale_price' => $salePrice,
+                    ':stock' => $stock,
                     ':thumbnail' => $thumbnailPath,
                     ':short_description' => $shortDescription,
                     ':description' => $description,
+                    ':nutrition_info' => $nutritionInfo,
+                    ':is_featured' => $form['is_featured'],
+                    ':is_active' => $form['is_active'],
                 ]);
 
                 $newId = (int)$pdo->lastInsertId();
@@ -165,8 +232,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } catch (Throwable $exception) {
+            if ($exception->getMessage() === 'validation_failed') {
+                // Validation messages already populated above.
+            } else {
             $errors[] = 'Không thể lưu sản phẩm. Vui lòng kiểm tra dữ liệu và thử lại.';
+            }
         }
+    }
     }
 }
 
@@ -174,7 +246,7 @@ if (isset($_GET['created']) && (int)$_GET['created'] === 1) {
     $success = 'Tạo sản phẩm mới thành công.';
 }
 
-$products = $pdo->query('SELECT p.id, p.name, p.sku, p.price, p.sale_price, p.thumbnail, c.name AS category_name
+$products = $pdo->query('SELECT p.id, p.name, p.sku, p.price, p.sale_price, p.stock, p.thumbnail, p.is_featured, p.is_active, c.name AS category_name
     FROM products p
     INNER JOIN categories c ON c.id = p.category_id
     ORDER BY p.id DESC')->fetchAll();
@@ -234,17 +306,25 @@ function product_image_url(?string $thumbnail): string
         return app_url('assets/img/icon.png');
     }
 
+    $thumbnail = trim($thumbnail);
+
     if (str_starts_with($thumbnail, 'http://') || str_starts_with($thumbnail, 'https://')) {
         return $thumbnail;
     }
 
-    return app_url($thumbnail);
+    $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/\\');
+    $base = $base === '.' ? '' : $base;
+    if (str_starts_with($thumbnail, $base . '/')) {
+        return $thumbnail;
+    }
+
+    return app_url(ltrim($thumbnail, '/'));
 }
 ?>
 <div class="container">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h2 class="mb-0">Quản lý sản phẩm</h2>
-        <a class="btn btn-outline-secondary" href="<?= e(app_url('index.php?page=admin')) ?>">Về Dashboard</a>
+        <a class="btn btn-outline-secondary" href="<?= e(app_url('index.php?page=admin_orders')) ?>">Về xử lý đơn</a>
     </div>
 
     <?php if ($success !== ''): ?>
@@ -277,6 +357,11 @@ function product_image_url(?string $thumbnail): string
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">SKU</label>
+                            <input type="text" class="form-control" name="sku" value="<?= e((string)$form['sku']) ?>" placeholder="Để trống để tự tạo mã">
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Danh mục</label>
                             <select class="form-select" name="category_id" required>
                                 <?php foreach ($categories as $category): ?>
@@ -299,6 +384,11 @@ function product_image_url(?string $thumbnail): string
                         </div>
 
                         <div class="mt-3">
+                            <label class="form-label">Tồn kho</label>
+                            <input type="number" class="form-control" min="0" step="1" name="stock" value="<?= e((string)$form['stock']) ?>">
+                        </div>
+
+                        <div class="mt-3">
                             <label class="form-label">Hình ảnh sản phẩm</label>
                             <input type="file" class="form-control" name="thumbnail" accept=".jpg,.jpeg,.png,.webp,.gif">
                             <small class="text-muted">Để trống nếu muốn giữ ảnh hiện tại.</small>
@@ -311,8 +401,29 @@ function product_image_url(?string $thumbnail): string
                         <?php endif; ?>
 
                         <div class="mt-3">
+                            <label class="form-label">Mô tả ngắn</label>
+                            <input type="text" class="form-control" name="short_description" maxlength="255" value="<?= e((string)$form['short_description']) ?>" placeholder="Mô tả ngắn hiển thị trên card sản phẩm">
+                        </div>
+
+                        <div class="mt-3">
                             <label class="form-label">Mô tả</label>
                             <textarea class="form-control" rows="4" name="description" placeholder="Mô tả chi tiết sản phẩm..."><?= e((string)$form['description']) ?></textarea>
+                        </div>
+
+                        <div class="mt-3">
+                            <label class="form-label">Thông tin dinh dưỡng</label>
+                            <textarea class="form-control" rows="2" name="nutrition_info" placeholder="Ví dụ: Calories: 120 | Đường: 20g"><?= e((string)$form['nutrition_info']) ?></textarea>
+                        </div>
+
+                        <div class="mt-3 d-flex flex-wrap gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured" <?= (int)$form['is_featured'] === 1 ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="isFeatured">Sản phẩm nổi bật</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" <?= (int)$form['is_active'] === 1 ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="isActive">Đang kinh doanh</label>
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
@@ -335,8 +446,10 @@ function product_image_url(?string $thumbnail): string
                                     <th>Ảnh</th>
                                     <th>Tên</th>
                                     <th>Danh mục</th>
+                                    <th>Trạng thái</th>
                                     <th>Giá</th>
                                     <th>Giá mới</th>
+                                    <th>Tồn</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -351,12 +464,33 @@ function product_image_url(?string $thumbnail): string
                                             <small class="text-muted">SKU: <?= e($product['sku']) ?></small>
                                         </td>
                                         <td><?= e($product['category_name']) ?></td>
+                                        <td>
+                                            <?php if ((int)$product['is_active'] === 1): ?>
+                                                <span class="badge text-bg-success">Active</span>
+                                            <?php else: ?>
+                                                <span class="badge text-bg-secondary">Deactive</span>
+                                            <?php endif; ?>
+                                            <?php if ((int)$product['is_featured'] === 1): ?>
+                                                <span class="badge text-bg-warning text-dark">Nổi bật</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td><?= e(format_currency((float)$product['price'])) ?></td>
                                         <td>
                                             <?= $product['sale_price'] !== null ? e(format_currency((float)$product['sale_price'])) : '<span class="text-muted">-</span>' ?>
                                         </td>
+                                        <td><?= (int)$product['stock'] ?></td>
                                         <td class="text-end">
-                                            <a class="btn btn-sm btn-outline-success" href="<?= e(app_url('index.php?page=admin_products&edit=' . (int)$product['id'])) ?>">Sửa</a>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <a class="btn btn-sm btn-outline-success" href="<?= e(app_url('index.php?page=admin_products&edit=' . (int)$product['id'])) ?>">Sửa</a>
+                                                <form method="post" class="d-inline">
+                                                    <input type="hidden" name="action" value="toggle_active">
+                                                    <input type="hidden" name="product_id" value="<?= (int)$product['id'] ?>">
+                                                    <input type="hidden" name="next_status" value="<?= (int)$product['is_active'] === 1 ? '0' : '1' ?>">
+                                                    <button type="submit" class="btn btn-sm <?= (int)$product['is_active'] === 1 ? 'btn-outline-secondary' : 'btn-outline-success' ?>">
+                                                        <?= (int)$product['is_active'] === 1 ? 'Deactive' : 'Active' ?>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

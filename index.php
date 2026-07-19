@@ -13,13 +13,21 @@ $allowedPages = [
 	'cart',
 	'checkout',
 	'account',
-	'admin',
+	'admin_login',
+	'admin_dashboard',
+	'admin_orders',
 	'admin_products',
 ];
 
 $page = $_GET['page'] ?? 'home';
 if (!in_array($page, $allowedPages, true)) {
 	$page = 'home';
+}
+
+$adminPages = ['admin_dashboard', 'admin_orders', 'admin_products'];
+if (in_array($page, $adminPages, true) && !is_admin_authenticated()) {
+	header('Location: ' . app_url('index.php?page=admin_login&redirect=' . urlencode($page)));
+	exit;
 }
 
 $pageFile = __DIR__ . '/pages/' . $page . '.php';

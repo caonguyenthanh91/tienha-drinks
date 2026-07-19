@@ -1,3 +1,5 @@
+document.documentElement.classList.add("js");
+
 async function openQuickView(productId) {
     const modalEl = document.getElementById("productQuickViewModal");
     const body = document.getElementById("productQuickViewBody");
@@ -17,6 +19,9 @@ async function openQuickView(productId) {
 
         const p = json.data;
         const oldPrice = p.sale_price ? `<span class=\"old-price\">${formatVnd(p.price)}</span>` : "";
+        const addCartButton = p.is_active
+            ? `<button class=\"btn btn-success\" onclick=\"addToCart(${p.id}, 1)\">Them vao gio hang</button>`
+            : '<button class="btn btn-secondary" type="button" disabled>Tam ngung</button>';
 
         body.innerHTML = `
             <div class="row g-3 align-items-center">
@@ -28,7 +33,7 @@ async function openQuickView(productId) {
                     <h4 class="mt-1">${escapeHtml(p.name)}</h4>
                     <div class="price-wrap mb-3">${oldPrice}<span class="new-price">${formatVnd(p.effective_price)}</span></div>
                     <p class="text-muted">${escapeHtml(p.description || "Dang cap nhat mo ta...")}</p>
-                    <button class="btn btn-success" onclick="addToCart(${p.id}, 1)">Them vao gio hang</button>
+                    ${addCartButton}
                 </div>
             </div>
         `;

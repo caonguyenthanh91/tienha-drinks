@@ -7,35 +7,29 @@ $testimonials = get_testimonials();
 
 $banners = [
     [
-        'image' => app_url('assets/img/banners/signature-banner.webp'),
-        'badge' => 'Signature 2026',
-        'title' => 'Thức uống signature pha chế mỗi ngày',
-        'desc'  => 'Nguyên liệu tươi tuyển chọn, công thức độc quyền của M&T Quán.',
-        'link'  => app_url('index.php?page=products'),
-        'cta'   => 'Khám phá Menu',
+        'image' => app_url('assets/img/banners/tra-sua.png'),
+        'badge' => 'Trá sữa',
+        'title' => 'Trà sữa hương vị đặc trưng',
+        'desc'  => 'Công thức độc quyền của M&T Quán.',
+        'link'  => '#',
+        'modal' => '#menuModal1',
+        'cta'   => 'Menu trà sữa',
     ],
     [
-        'image' => app_url('assets/img/banners/ca-phe-banner.webp'),
-        'badge' => 'Cà phê rang mộc',
-        'title' => 'Đậm đà từng giọt, tỉnh táo cả ngày',
-        'desc'  => 'Cà phê phin, bạc xỉu, latte đá — chuẩn gu người Việt.',
-        'link'  => app_url('index.php?page=products&category=ca-phe'),
-        'cta'   => 'Xem cà phê',
-    ],
-    [
-        'image' => app_url('assets/img/banners/nuoc-ep-banner.webp'),
-        'badge' => 'Healthy & tươi',
-        'title' => 'Nước ép & sinh tố xanh mát mỗi ngày',
-        'desc'  => 'Bổ sung vitamin, thanh lọc cơ thể, giao tận nơi nhanh chóng.',
-        'link'  => app_url('index.php?page=products&category=nuoc-ep'),
-        'cta'   => 'Xem nước ép',
-    ],
+        'image' => app_url('assets/img/banners/tra-trai-cay.png'),
+        'badge' => 'Trà trái cây tươi',
+        'title' => 'Cảm giác tươi mới mỗi ngày',
+        'desc'  => 'Nguyên liệu tươi ngon tuyển chọn.',
+        'link'  => '#',
+        'modal' => '#menuModal2',
+        'cta'   => 'Menu trà trái cây',
+    ]
 ];
 
 $features = [
     ['icon' => '🥤', 'title' => 'Nguyên liệu tươi', 'desc' => 'Trái cây tuyển chọn trong ngày'],
-    ['icon' => '⚡', 'title' => 'Giao hàng nhanh', 'desc' => 'Nội thành trong 30 phút'],
-    ['icon' => '🎁', 'title' => 'Tích điểm đổi quà', 'desc' => 'Ưu đãi cho thành viên'],
+    ['icon' => '⚡', 'title' => 'Freeship từ 10 ly', 'desc' => 'Trong KCN Long Đức, An Phước'],
+    ['icon' => '🎁', 'title' => 'Tích điểm giảm giá', 'desc' => 'Tích 1% trên tổng hóa đơn, trừ thẳng vào giá'],
     ['icon' => '💳', 'title' => 'Thanh toán linh hoạt', 'desc' => 'COD, chuyển khoản, Momo'],
 ];
 ?>
@@ -59,8 +53,12 @@ $features = [
                             <h1><?= e($banner['title']) ?></h1>
                             <p><?= e($banner['desc']) ?></p>
                             <div class="d-flex gap-2 flex-wrap">
-                                <a href="<?= e($banner['link']) ?>" class="btn btn-success btn-lg btn-glow"><?= e($banner['cta']) ?></a>
-                                <a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-light btn-lg">Liên hệ đặt hàng</a>
+                                <?php if (!empty($banner['modal'])): ?>
+                                    <a href="#" class="btn btn-success btn-lg btn-glow" data-bs-toggle="modal" data-bs-target="<?= e($banner['modal']) ?>"><?= e($banner['cta']) ?></a>
+                                <?php else: ?>
+                                    <a href="<?= e($banner['link']) ?>" class="btn btn-success btn-lg btn-glow"><?= e($banner['cta']) ?></a>
+                                <?php endif; ?>
+                                <a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-light btn-lg">Đặt hàng</a>
                             </div>
                         </div>
                     </div>
@@ -80,10 +78,11 @@ $features = [
 <section class="container mt-5" data-reveal>
     <div class="cta-banner">
         <div>
-            <h3 class="mb-1">Sẵn sàng thưởng thức?</h3>
-            <p class="mb-0">Đặt ngay hôm nay — giảm 15% cho đơn hàng đầu tiên & freeship từ 300.000đ.</p>
+            <h3 class="mb-1">🎉 Tưng bừng khai trương 🎉</h3>
+            <p class="mb-0">Từ 28.7 đến 31.7 đồng loạt giảm giá 20% cho tất cả đơn hàng.</p>
         </div>
-        <a href="#" class="btn btn-light btn-lg btn-glow" data-bs-toggle="modal" data-bs-target="#menuModal">Thực đơn</a>
+        <!-- <a href="#" class="btn btn-light btn-lg btn-glow" data-bs-toggle="modal" data-bs-target="#menuModal1">Trà sữa</a> -->
+        <!-- <a href="#" class="btn btn-light btn-lg btn-glow" data-bs-toggle="modal" data-bs-target="#menuModal2">Trà trái cây</a> -->
         <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-light btn-lg btn-glow">Đặt ngay</a>
     </div>
 </section>
@@ -93,13 +92,14 @@ $features = [
     <div class="section-heading text-center mb-4">
         <span class="section-eyebrow">Danh mục</span>
         <h2>Chọn thức uống theo gu của bạn</h2>
-        <p class="text-muted mb-0">Từ cà phê đậm đà đến sinh tố mát lạnh — luôn có món dành cho bạn.</p>
+        <p class="text-muted mb-0">Từ trà sữa đậm vị đến trà trái cây mát lạnh — luôn có món dành cho bạn.</p>
     </div>
     <div class="row g-3 g-lg-4">
         <?php foreach ($categories as $index => $cat): ?>
             <div class="col-6 col-lg" data-reveal style="--delay: <?= $index * 0.08 ?>s">
                 <a class="cat-tile text-decoration-none" href="<?= e(app_url('index.php?page=products&category=' . urlencode($cat['slug']))) ?>">
-                    <div class="cat-tile-img" style="background-image:url('<?= e($cat['image']) ?>')"></div>
+                    <?php $catBg = !empty($cat['image']) ? "url('" . e($cat['image']) . "')" : 'linear-gradient(135deg, #1f8a4c, #0b5d2e)'; ?>
+                    <div class="cat-tile-img" style="background-image:<?= $catBg ?>"></div>
                     <div class="cat-tile-overlay"></div>
                     <div class="cat-tile-body">
                         <h5><?= e($cat['name']) ?></h5>
@@ -144,9 +144,15 @@ $features = [
                             <?php endif; ?>
                             <span class="new-price"><?= e(format_currency($price)) ?></span>
                         </div>
-                        <button class="btn btn-success btn-sm mt-auto add-cart-btn" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">
-                            <span>Thêm vào giỏ</span>
-                        </button>
+                        <?php if ((int)($product['is_active'] ?? 1) === 1): ?>
+                            <button class="btn btn-success btn-sm mt-auto add-cart-btn" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">
+                                <span>Thêm vào giỏ</span>
+                            </button>
+                        <?php else: ?>
+                            <button class="btn btn-secondary btn-sm mt-auto add-cart-btn" type="button" disabled>
+                                <span>Tạm ngưng</span>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -202,7 +208,7 @@ $features = [
 </section>
 
 <!-- ============ MENU MODAL ============ -->
-<div class="modal fade" id="menuModal" tabindex="-1">
+<div class="modal fade" id="menuModal1" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -210,7 +216,20 @@ $features = [
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body p-0">
-                <img src="<?= e(app_url('assets/img/menu.jpg')) ?>" class="w-100" alt="Thực đơn">
+                <img src="<?= e(app_url('assets/img/menu/tra_sua_menu.png')) ?>" class="w-100" alt="Thực đơn">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="menuModal2" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thực đơn M&T Quán</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img src="<?= e(app_url('assets/img/menu/tra_trai_cay_menu.png')) ?>" class="w-100" alt="Thực đơn">
             </div>
         </div>
     </div>

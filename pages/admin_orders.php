@@ -1,0 +1,305 @@
+<?php
+declare(strict_types=1);
+
+$message = '';
+$messageType = 'success';
+
+$selectedDate = trim((string)($_GET['date'] ?? ''));
+$preset = trim((string)($_GET['preset'] ?? ''));
+
+if ($selectedDate !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $selectedDate)) {
+    $selectedDate = '';
+}
+
+$rangeStart = null;
+$rangeEnd = null;
+
+$today = new DateTimeImmutable('today');
+switch ($preset) {
+    case 'yesterday':
+        $rangeStart = $today->modify('-1 day')->format('Y-m-d 00:00:00');
+        $rangeEnd = $today->format('Y-m-d 00:00:00');
+        break;
+    case 'today':
+        $rangeStart = $today->format('Y-m-d 00:00:00');
+        $rangeEnd = $today->modify('+1 day')->format('Y-m-d 00:00:00');
+        break;
+    case 'week':
+        $rangeStart = $today->modify('monday this week')->format('Y-m-d 00:00:00');
+        $rangeEnd = $today->modify('+1 day')->format('Y-m-d 00:00:00');
+        break;
+    default:
+        $preset = '';
+        if ($selectedDate !== '') {
+            $pickedDay = DateTimeImmutable::createFromFormat('Y-m-d', $selectedDate);
+            if ($pickedDay instanceof DateTimeImmutable) {
+                $rangeStart = $pickedDay->format('Y-m-d 00:00:00');
+                $rangeEnd = $pickedDay->modify('+1 day')->format('Y-m-d 00:00:00');
+            } else {
+                $selectedDate = '';
+            }
+        }
+        break;
+}
+
+$buildAdminOrdersUrl = static function (array $overrides = []) use ($selectedDate, $preset): string {
+    $params = [
+        'page' => 'admin_orders',
+    ];
+
+    if ($selectedDate !== '') {
+        $params['date'] = $selectedDate;
+    }
+    if ($preset !== '') {
+        $params['preset'] = $preset;
+    }
+
+    foreach ($overrides as $key => $value) {
+        if ($value === null || $value === '') {
+            unset($params[$key]);
+            continue;
+        }
+        $params[$key] = (string)$value;
+    }
+
+    return app_url('index.php?' . http_build_query($params));
+};
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_order_note') {
+    $orderId = (int)($_POST['order_id'] ?? 0);
+    $note = trim((string)($_POST['note'] ?? ''));
+
+    if ($orderId <= 0) {
+        $message = 'Dữ liệu phản hồi không hợp lệ.';
+        $messageType = 'danger';
+    } else {
+        $stmt = db()->prepare('UPDATE orders SET note = :note WHERE id = :id');
+        $stmt->execute([
+            ':note' => $note !== '' ? $note : null,
+            ':id' => $orderId,
+        ]);
+        $message = 'Đã cập nhật phản hồi đơn hàng.';
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_order_status') {
+    $orderId = (int)($_POST['order_id'] ?? 0);
+    $nextStatus = (string)($_POST['next_status'] ?? '');
+
+    if ($orderId <= 0 || $nextStatus === '') {
+        $message = 'Dữ liệu cập nhật trạng thái không hợp lệ.';
+        $messageType = 'danger';
+    } else {
+        $result = update_order_status_by_admin($orderId, $nextStatus);
+        $message = $result['message'];
+        $messageType = $result['success'] ? 'success' : 'danger';
+    }
+}
+
+$query = 'SELECT id, order_code, customer_name, customer_phone, customer_email, shipping_address, payment_method, final_total, status, note, created_at, updated_at FROM orders';
+$queryParams = [];
+
+if ($rangeStart !== null && $rangeEnd !== null) {
+    $query .= ' WHERE created_at >= :range_start AND created_at < :range_end';
+    $queryParams[':range_start'] = $rangeStart;
+    $queryParams[':range_end'] = $rangeEnd;
+}
+
+$query .= ' ORDER BY CASE WHEN status IN ("completed", "cancelled") THEN 1 ELSE 0 END ASC, FIELD(status, "pending", "confirmed", "shipping", "completed", "cancelled") ASC, id DESC LIMIT 120';
+
+$stmt = db()->prepare($query);
+$stmt->execute($queryParams);
+$incomingOrders = $stmt->fetchAll();
+
+$activeOrders = [];
+$archivedOrders = [];
+
+foreach ($incomingOrders as $order) {
+    if (in_array((string)$order['status'], ['completed', 'cancelled'], true)) {
+        $archivedOrders[] = $order;
+        continue;
+    }
+    $activeOrders[] = $order;
+}
+?>
+<div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <span class="section-eyebrow">Order Desk</span>
+            <h2 class="mb-0">Theo dõi và phản hồi đơn hàng</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-success" href="<?= e(app_url('index.php?page=admin_dashboard')) ?>">Xem dashboard</a>
+            <a class="btn btn-success" href="<?= e(app_url('index.php?page=admin_products')) ?>">Quản lý sản phẩm</a>
+        </div>
+    </div>
+
+    <?php if ($message !== ''): ?>
+        <div class="alert alert-<?= e($messageType) ?> alert-dismissible fade show" role="alert">
+            <?= e($message) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <h5 class="mb-2">Lọc theo ngày</h5>
+            <p class="text-muted small mb-3">Chọn ngày cụ thể hoặc dùng nút nhanh để xem đơn hôm qua, hôm nay và tuần này.</p>
+            <form method="get" class="row g-2 align-items-end admin-order-filter">
+                <input type="hidden" name="page" value="admin_orders">
+                <input type="hidden" name="preset" value="">
+                <div class="col-sm-6 col-lg-3">
+                    <label for="adminOrderDate" class="form-label mb-1">Ngày</label>
+                    <input id="adminOrderDate" type="date" name="date" class="form-control" value="<?= e($selectedDate) ?>">
+                </div>
+                <div class="col-sm-6 col-lg-3 d-grid d-sm-flex gap-2">
+                    <button class="btn btn-success" type="submit">Áp dụng</button>
+                    <a class="btn btn-outline-secondary" href="<?= e($buildAdminOrdersUrl(['date' => null, 'preset' => null])) ?>">Tất cả</a>
+                </div>
+                <div class="col-12 col-lg-6 d-flex flex-wrap gap-2">
+                    <a class="btn <?= $preset === 'yesterday' ? 'btn-dark' : 'btn-outline-dark' ?>" href="<?= e($buildAdminOrdersUrl(['preset' => 'yesterday', 'date' => null])) ?>">Hôm qua</a>
+                    <a class="btn <?= $preset === 'today' ? 'btn-success' : 'btn-outline-success' ?>" href="<?= e($buildAdminOrdersUrl(['preset' => 'today', 'date' => null])) ?>">Hôm nay</a>
+                    <a class="btn <?= $preset === 'week' ? 'btn-primary' : 'btn-outline-primary' ?>" href="<?= e($buildAdminOrdersUrl(['preset' => 'week', 'date' => null])) ?>">Tuần này</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-2">Đơn cần xử lý trước (<?= count($activeOrders) ?>)</h5>
+            <p class="text-muted small mb-3">Nút trạng thái được thiết kế dạng chạm nhanh. Phản hồi hỗ trợ nhiều dòng và hiển thị cho khách ở trang tài khoản.</p>
+            <?php if ($activeOrders === []): ?>
+                <p class="text-muted mb-0">Không có đơn cần xử lý trong bộ lọc hiện tại.</p>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Địa chỉ</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Tổng</th>
+                                <th>Xử lý nhanh</th>
+                                <th>Phản hồi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($activeOrders as $order): ?>
+                            <tr>
+                                <td>
+                                    <strong><?= e($order['order_code']) ?></strong>
+                                    <small class="d-block text-muted"><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></small>
+                                </td>
+                                <td>
+                                    <?= e($order['customer_name']) ?>
+                                    <small class="d-block text-muted"><?= e($order['customer_phone']) ?></small>
+                                    <small class="d-block text-muted"><?= e((string)($order['customer_email'] ?? '')) ?></small>
+                                </td>
+                                <td>
+                                    <small><?= e($order['shipping_address']) ?></small>
+                                    <small class="d-block text-muted">Thanh toán: <?= e((string)$order['payment_method']) ?></small>
+                                </td>
+                                <td>
+                                    <span class="badge <?= e(order_status_badge_class((string)$order['status'])) ?>">
+                                        <?= e(order_status_label((string)$order['status'])) ?>
+                                    </span>
+                                </td>
+                                <td class="text-end fw-semibold"><?= e(format_currency((float)$order['final_total'])) ?></td>
+                                <td style="min-width: 190px;">
+                                    <?php $nextOptions = allowed_next_order_statuses((string)$order['status']); ?>
+                                    <?php if ($nextOptions): ?>
+                                        <div class="admin-status-actions">
+                                            <?php foreach ($nextOptions as $status): ?>
+                                                <?php
+                                                    $touchBtnClass = match ($status) {
+                                                        'confirmed' => 'btn-outline-info',
+                                                        'shipping' => 'btn-outline-primary',
+                                                        'completed' => 'btn-outline-success',
+                                                        'cancelled' => 'btn-outline-danger',
+                                                        default => 'btn-outline-secondary',
+                                                    };
+                                                ?>
+                                                <form method="post" action="<?= e($buildAdminOrdersUrl()) ?>">
+                                                    <input type="hidden" name="action" value="update_order_status">
+                                                    <input type="hidden" name="order_id" value="<?= (int)$order['id'] ?>">
+                                                    <input type="hidden" name="next_status" value="<?= e($status) ?>">
+                                                    <button class="btn <?= e($touchBtnClass) ?> admin-touch-btn w-100" type="submit">
+                                                        <?= e(order_status_label($status)) ?>
+                                                    </button>
+                                                </form>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <small class="text-muted">Đã khóa</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="min-width: 280px;">
+                                    <form method="post" action="<?= e($buildAdminOrdersUrl()) ?>" class="d-flex flex-column gap-2">
+                                        <input type="hidden" name="action" value="update_order_note">
+                                        <input type="hidden" name="order_id" value="<?= (int)$order['id'] ?>">
+                                        <textarea name="note" class="form-control admin-note-input" rows="2" placeholder="Nhập phản hồi khách hàng...\nVí dụ: Đơn giao trong 30 phút."><?= e((string)($order['note'] ?? '')) ?></textarea>
+                                        <button class="btn btn-primary admin-touch-btn" type="submit">Gửi phản hồi</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-2">Đơn đã hoàn thành hoặc đã hủy (<?= count($archivedOrders) ?>)</h5>
+            <p class="text-muted small mb-3">Khu vực riêng cho các đơn đã kết thúc để tránh che khuất đơn đang cần xử lý.</p>
+            <?php if ($archivedOrders === []): ?>
+                <p class="text-muted mb-0">Không có đơn đã hoàn thành hoặc đã hủy trong bộ lọc hiện tại.</p>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Tổng</th>
+                                <th>Phản hồi đã gửi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($archivedOrders as $order): ?>
+                            <tr>
+                                <td>
+                                    <strong><?= e($order['order_code']) ?></strong>
+                                    <small class="d-block text-muted"><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></small>
+                                </td>
+                                <td>
+                                    <?= e($order['customer_name']) ?>
+                                    <small class="d-block text-muted"><?= e($order['customer_phone']) ?></small>
+                                </td>
+                                <td>
+                                    <span class="badge <?= e(order_status_badge_class((string)$order['status'])) ?>">
+                                        <?= e(order_status_label((string)$order['status'])) ?>
+                                    </span>
+                                </td>
+                                <td class="text-end fw-semibold"><?= e(format_currency((float)$order['final_total'])) ?></td>
+                                <td>
+                                    <?php if (trim((string)($order['note'] ?? '')) !== ''): ?>
+                                        <small class="d-block" style="white-space: pre-line;"><?= e((string)$order['note']) ?></small>
+                                    <?php else: ?>
+                                        <small class="text-muted">Chưa có phản hồi</small>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>

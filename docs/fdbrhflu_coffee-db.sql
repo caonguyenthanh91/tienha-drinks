@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jul 14, 2026 at 01:06 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost:3306
+-- Generation Time: Jul 17, 2026 at 08:01 AM
+-- Server version: 5.7.41-cll-lve
+-- PHP Version: 7.2.34
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -33,10 +33,10 @@ CREATE TABLE `admins` (
   `email` varchar(180) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `role` enum('super_admin','editor','staff') NOT NULL DEFAULT 'staff',
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `admins`
@@ -61,9 +61,9 @@ CREATE TABLE `blog_posts` (
   `author_name` varchar(120) NOT NULL,
   `status` enum('draft','published') NOT NULL DEFAULT 'draft',
   `published_at` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `blog_posts`
@@ -86,21 +86,20 @@ CREATE TABLE `categories` (
   `slug` varchar(160) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL,
-  `display_order` int(11) NOT NULL DEFAULT 0,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `display_order` int(11) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `image`, `display_order`, `is_active`, `created_at`) VALUES
-(1, 'Cà phê', 'ca-phe', 'Cà phê đen đá, bạc xỉu, latte và blend signature.', '/demo/tienha-drinks/assets/img/products/category_1.jpg', 1, 1, '2026-07-07 20:48:33'),
-(2, 'Nước ép', 'nuoc-ep', 'Nước ép trái cây tươi trong ngày.', 'https://images.unsplash.com/photo-1600271886742-f049cd5bba3f', 2, 1, '2026-07-07 20:48:33'),
-(3, 'Sinh tố', 'sinh-to', 'Sinh tố đậm vị, bổ sung năng lượng.', 'https://images.unsplash.com/photo-1553530666-ba11a90b8c74', 3, 1, '2026-07-07 20:48:33'),
-(4, 'Trà trái cây', 'tra-trai-cay', 'Trà thanh mát kết hợp topping trái cây.', '/demo/tienha-drinks/assets/img/products/category_4.jpg', 4, 1, '2026-07-07 20:48:33'),
-(5, 'Sữa chua', 'sua-chua', 'Sữa chua mix trái cây và granola.', '/demo/tienha-drinks/assets/img/products/category_5.jpg', 5, 1, '2026-07-07 20:48:33');
+(1, 'Trà sữa', 'tra-sua', 'Trà sữa Đài loan ngon xỉu', '/demo/tienha-drinks/assets/img/categories/tra-sua.png', 1, 1, '2026-07-07 20:48:33'),
+(2, 'Trà trái cây', 'tra-trai-cay', 'Trà thanh mát kết hợp topping trái cây.', '/demo/tienha-drinks/assets/img/categories/tra-trai-cay.png', 2, 1, '2026-07-07 20:48:33'),
+(3, 'Sinh tố', 'sinh-to', 'Sẽ sớm ra mắt', NULL, 3, 1, '2026-07-07 20:48:33'),
+(4, 'Ăn vặt', 'an-vat', 'Bánh tráng trộn, rau câu ngon tuyệt', NULL, 4, 1, '2026-07-07 20:48:33');
 
 -- --------------------------------------------------------
 
@@ -115,8 +114,8 @@ CREATE TABLE `contact_messages` (
   `email` varchar(180) DEFAULT NULL,
   `message` text NOT NULL,
   `status` enum('new','processing','done') NOT NULL DEFAULT 'new',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `contact_messages`
@@ -138,22 +137,22 @@ CREATE TABLE `coupons` (
   `title` varchar(120) NOT NULL,
   `discount_type` enum('fixed','percent') NOT NULL,
   `discount_value` decimal(10,2) NOT NULL,
-  `min_order_value` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `min_order_value` decimal(12,2) NOT NULL DEFAULT '0.00',
   `start_at` datetime NOT NULL,
   `end_at` datetime NOT NULL,
   `usage_limit` int(11) DEFAULT NULL,
-  `used_count` int(11) NOT NULL DEFAULT 0,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `used_count` int(11) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `coupons`
 --
 
 INSERT INTO `coupons` (`id`, `code`, `title`, `discount_type`, `discount_value`, `min_order_value`, `start_at`, `end_at`, `usage_limit`, `used_count`, `is_active`, `created_at`) VALUES
-(1, 'HELLOTIENHA', 'Giảm cho khách mới', 'percent', 15.00, 100000.00, '2026-01-01 00:00:00', '2026-12-31 23:59:59', 3000, 124, 1, '2026-07-07 20:48:33'),
-(2, 'FREESHIP300', 'Miễn phí giao hàng từ 300K', 'fixed', 20000.00, 300000.00, '2026-01-01 00:00:00', '2026-12-31 23:59:59', NULL, 332, 1, '2026-07-07 20:48:33');
+(1, 'HELLOTIENHA', 'Giảm cho khách mới', 'percent', '15.00', '100000.00', '2026-01-01 00:00:00', '2026-12-31 23:59:59', 3000, 124, 1, '2026-07-07 20:48:33'),
+(2, 'FREESHIP300', 'Miễn phí giao hàng từ 300K', 'fixed', '20000.00', '300000.00', '2026-01-01 00:00:00', '2026-12-31 23:59:59', NULL, 332, 1, '2026-07-07 20:48:33');
 
 -- --------------------------------------------------------
 
@@ -168,21 +167,21 @@ CREATE TABLE `customers` (
   `phone` varchar(20) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `tier_id` int(10) UNSIGNED DEFAULT NULL,
-  `points` int(11) NOT NULL DEFAULT 0,
-  `total_spending` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `points` int(11) NOT NULL DEFAULT '0',
+  `total_spending` decimal(12,2) NOT NULL DEFAULT '0.00',
   `default_address` varchar(255) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `customers`
 --
 
 INSERT INTO `customers` (`id`, `full_name`, `email`, `phone`, `password_hash`, `tier_id`, `points`, `total_spending`, `default_address`, `created_at`, `updated_at`) VALUES
-(1, 'Nguyễn Minh Thu', 'thu.nguyen@example.com', '0908000001', '$2y$10$abcdefghijklmnopqrstuv', 2, 260, 2850000.00, '45 Nguyễn Huệ, Q1, TP.HCM', '2026-07-07 20:48:33', '2026-07-07 20:48:33'),
-(2, 'Trần Hoàng Nam', 'nam.tran@example.com', '0908000002', '$2y$10$abcdefghijklmnopqrstuv', 1, 90, 780000.00, '21 Lê Lai, Q1, TP.HCM', '2026-07-07 20:48:33', '2026-07-07 20:48:33'),
-(3, 'Lê Thu Hà', 'ha.le@example.com', '0908000003', '$2y$10$abcdefghijklmnopqrstuv', 3, 520, 6120000.00, '99 Bùi Viện, Q1, TP.HCM', '2026-07-07 20:48:33', '2026-07-07 20:48:33');
+(1, 'Hà Trần Mỹ Tiên', 'thu.nguyen@example.com', '0368166816', '$2y$10$abcdefghijklmnopqrstuv', 3, 260, '2850000.00', '45 Nguyễn Huệ, Q1, TP.HCM', '2026-07-07 20:48:33', '2026-07-15 06:21:34'),
+(2, 'Cao Nguyễn Thạnh', 'nam.tran@example.com', '0398802109', '$2y$10$abcdefghijklmnopqrstuv', 2, 90, '780000.00', '21 Lê Lai, Q1, TP.HCM', '2026-07-07 20:48:33', '2026-07-15 06:21:53'),
+(3, 'Hà Trần Mỹ Linh', 'ha.le@example.com', '0937909290', '$2y$10$abcdefghijklmnopqrstuv', 1, 520, '412000.00', '99 Bùi Viện, Q1, TP.HCM', '2026-07-07 20:48:33', '2026-07-15 06:23:06');
 
 -- --------------------------------------------------------
 
@@ -193,19 +192,20 @@ INSERT INTO `customers` (`id`, `full_name`, `email`, `phone`, `password_hash`, `
 CREATE TABLE `customer_tiers` (
   `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(80) NOT NULL,
-  `min_spending` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `min_spending` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `discount_percent` decimal(5,2) NOT NULL DEFAULT '0.00',
   `benefits` varchar(255) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `customer_tiers`
 --
 
-INSERT INTO `customer_tiers` (`id`, `name`, `min_spending`, `benefits`, `created_at`) VALUES
-(1, 'Đồng', 0.00, 'Tích 1 điểm/10.000 VND', '2026-07-07 20:48:33'),
-(2, 'Bạc', 2000000.00, 'Tăng 5% cho đơn từ 200.000 VND', '2026-07-07 20:48:33'),
-(3, 'Vàng', 5000000.00, 'Tăng 10% + ưu tiên giao hàng', '2026-07-07 20:48:33');
+INSERT INTO `customer_tiers` (`id`, `name`, `min_spending`, `discount_percent`, `benefits`, `created_at`) VALUES
+(1, 'Đồng', '0.00', '0.00', 'Tích 1 điểm/10.000 VND', '2026-07-07 20:48:33'),
+(2, 'Bạc', '2000000.00', '5.00', 'Tăng 5% cho đơn từ 200.000 VND', '2026-07-07 20:48:33'),
+(3, 'Vàng', '5000000.00', '10.00', 'Tăng 10% + ưu tiên giao hàng', '2026-07-07 20:48:33');
 
 -- --------------------------------------------------------
 
@@ -223,23 +223,23 @@ CREATE TABLE `orders` (
   `shipping_address` varchar(255) NOT NULL,
   `payment_method` enum('cod','bank_transfer','momo') NOT NULL DEFAULT 'cod',
   `status` enum('pending','confirmed','shipping','completed','cancelled') NOT NULL DEFAULT 'pending',
-  `subtotal` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `shipping_fee` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `discount_amount` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `final_total` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `subtotal` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `shipping_fee` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `discount_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `final_total` decimal(12,2) NOT NULL DEFAULT '0.00',
   `note` varchar(255) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `orders`
 --
 
 INSERT INTO `orders` (`id`, `order_code`, `customer_id`, `customer_name`, `customer_phone`, `customer_email`, `shipping_address`, `payment_method`, `status`, `subtotal`, `shipping_fee`, `discount_amount`, `final_total`, `note`, `created_at`, `updated_at`) VALUES
-(1, 'TH20260701001', 1, 'Nguyễn Minh Thu', '0908000001', 'thu.nguyen@example.com', '45 Nguyễn Huệ, Q1, TP.HCM', 'momo', 'completed', 152000.00, 20000.00, 22000.00, 150000.00, 'Giao giờ hành chính', '2026-07-01 10:15:00', '2026-07-07 20:48:33'),
-(2, 'TH20260702001', 2, 'Trần Hoàng Nam', '0908000002', 'nam.tran@example.com', '21 Lê Lai, Q1, TP.HCM', 'cod', 'shipping', 98000.00, 20000.00, 0.00, 118000.00, NULL, '2026-07-02 15:20:00', '2026-07-07 20:48:33'),
-(3, 'TH20260703001', 3, 'Lê Thu Hà', '0908000003', 'ha.le@example.com', '99 Bùi Viện, Q1, TP.HCM', 'bank_transfer', 'confirmed', 224000.00, 0.00, 15000.00, 209000.00, NULL, '2026-07-03 09:40:00', '2026-07-07 20:48:33');
+(1, 'TH20260701001', 1, 'Nguyễn Minh Thu', '0908000001', 'thu.nguyen@example.com', '45 Nguyễn Huệ, Q1, TP.HCM', 'momo', 'completed', '152000.00', '20000.00', '22000.00', '150000.00', 'Giao giờ hành chính', '2026-07-01 10:15:00', '2026-07-07 20:48:33'),
+(2, 'TH20260702001', 2, 'Trần Hoàng Nam', '0908000002', 'nam.tran@example.com', '21 Lê Lai, Q1, TP.HCM', 'cod', 'shipping', '98000.00', '20000.00', '0.00', '118000.00', NULL, '2026-07-02 15:20:00', '2026-07-07 20:48:33'),
+(3, 'TH20260703001', 3, 'Lê Thu Hà', '0908000003', 'ha.le@example.com', '99 Bùi Viện, Q1, TP.HCM', 'bank_transfer', 'confirmed', '224000.00', '0.00', '15000.00', '209000.00', NULL, '2026-07-03 09:40:00', '2026-07-07 20:48:33');
 
 -- --------------------------------------------------------
 
@@ -255,22 +255,22 @@ CREATE TABLE `order_items` (
   `unit_price` decimal(12,2) NOT NULL,
   `quantity` int(11) NOT NULL,
   `line_total` decimal(12,2) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `order_items`
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_name`, `unit_price`, `quantity`, `line_total`, `created_at`) VALUES
-(1, 1, 1, 'Cà phê đen đá', 29000.00, 2, 58000.00, '2026-07-07 20:48:33'),
-(2, 1, 4, 'Nước ép cam dứa', 43000.00, 2, 86000.00, '2026-07-07 20:48:33'),
-(3, 1, 9, 'Trà đào cam sả', 42000.00, 1, 42000.00, '2026-07-07 20:48:33'),
-(4, 2, 2, 'Bạc xỉu ngọc trai', 39000.00, 1, 39000.00, '2026-07-07 20:48:33'),
-(5, 2, 8, 'Sinh tố dâu chuối', 58000.00, 1, 58000.00, '2026-07-07 20:48:33'),
-(6, 3, 5, 'Nước ép ổi kiwi', 52000.00, 2, 104000.00, '2026-07-07 20:48:33'),
-(7, 3, 7, 'Sinh tố bơ xoài', 51000.00, 2, 102000.00, '2026-07-07 20:48:33'),
-(8, 3, 10, 'Sữa chua granola trái cây', 59000.00, 1, 59000.00, '2026-07-07 20:48:33');
+(1, 1, 1, 'Cà phê đen đá', '29000.00', 2, '58000.00', '2026-07-07 20:48:33'),
+(2, 1, 4, 'Nước ép cam dứa', '43000.00', 2, '86000.00', '2026-07-07 20:48:33'),
+(3, 1, 7, 'Trà đào cam sả', '42000.00', 1, '42000.00', '2026-07-07 20:48:33'),
+(4, 2, 2, 'Bạc xỉu ngọc trai', '39000.00', 1, '39000.00', '2026-07-07 20:48:33'),
+(5, 2, NULL, 'Sinh tố dâu chuối', '58000.00', 1, '58000.00', '2026-07-07 20:48:33'),
+(6, 3, 5, 'Nước ép ổi kiwi', '52000.00', 2, '104000.00', '2026-07-07 20:48:33'),
+(7, 3, NULL, 'Sinh tố bơ xoài', '51000.00', 2, '102000.00', '2026-07-07 20:48:33'),
+(8, 3, 8, 'Sữa chua granola trái cây', '59000.00', 1, '59000.00', '2026-07-07 20:48:33');
 
 -- --------------------------------------------------------
 
@@ -285,8 +285,8 @@ CREATE TABLE `points_transactions` (
   `type` enum('earn','redeem','adjust') NOT NULL,
   `points` int(11) NOT NULL,
   `note` varchar(255) DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `points_transactions`
@@ -311,32 +311,51 @@ CREATE TABLE `products` (
   `sku` varchar(40) NOT NULL,
   `price` decimal(12,2) NOT NULL,
   `sale_price` decimal(12,2) DEFAULT NULL,
-  `stock` int(11) NOT NULL DEFAULT 0,
+  `stock` int(11) NOT NULL DEFAULT '0',
   `thumbnail` varchar(255) DEFAULT NULL,
   `short_description` varchar(255) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `nutrition_info` text DEFAULT NULL,
-  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `description` text,
+  `nutrition_info` text,
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `products`
 --
 
 INSERT INTO `products` (`id`, `category_id`, `name`, `slug`, `sku`, `price`, `sale_price`, `stock`, `thumbnail`, `short_description`, `description`, `nutrition_info`, `is_featured`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Cà phê đen đá', 'ca-phe-den-da', 'CF001', 32000.00, 29000.00, 120, '/demo/tienha-drinks/assets/img/products/product_1.jpg', 'Vị đậm, thơm mạnh, ít ngọt.', 'Cà phê nguyên chất phơi đá viên, phù hợp cho ngày cần tỉnh táo.', 'Calories: 40 | Đường: 6g', 1, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:11'),
-(2, 1, 'Bạc xỉu ngọc trai', 'bac-xiu-ngoc-trai', 'CF002', 42000.00, 39000.00, 90, '/demo/tienha-drinks/assets/img/products/product_2.jpg', 'Sữa nhiều hơn cà phê, vị nhẹ.', 'Bạc xỉu phối sữa tươi và top cream mịn, dễ uống cho người mới bắt đầu.', 'Calories: 180 | Đường: 16g', 1, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:12'),
-(3, 1, 'Latte đá', 'latte-da', 'CF003', 45000.00, NULL, 70, '/demo/tienha-drinks/assets/img/products/product_3.jpg', 'Cân bằng giữa sữa và espresso.', 'Latte đá cho vị mềm, hậu vị cà phê rõ nhưng không gắt.', 'Calories: 150 | Đường: 10g', 0, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:13'),
-(4, 2, 'Nước ép cam dứa', 'nuoc-ep-cam-dua', 'NE001', 48000.00, 43000.00, 80, '/demo/tienha-drinks/assets/img/products/product_4.jpg', 'Vitamin C cao, vị thanh mát.', 'Kết hợp cam ngọt và dứa tươi, giúp giải nhiệt nhanh.', 'Calories: 120 | Đường: 18g', 1, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:14'),
-(5, 2, 'Nước ép ổi kiwi', 'nuoc-ep-oi-kiwi', 'NE002', 52000.00, NULL, 65, '/demo/tienha-drinks/assets/img/products/product_5.jpg', 'Hương vị nhiệt đới, chua ngọt hài hòa.', 'Nước ép ổi và kiwi tươi, bổ sung chất xơ và khoáng chất.', 'Calories: 140 | Đường: 19g', 1, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:14'),
-(6, 2, 'Nước ép táo cần tây', 'nuoc-ep-tao-can-tay', 'NE003', 54000.00, 50000.00, 50, '/demo/tienha-drinks/assets/img/products/product_6.jpg', 'Thanh lọc cơ thể, ít ngọt.', 'Công thức thanh lọc với táo xanh, cần tây và lá bạc hà.', 'Calories: 95 | Đường: 11g', 0, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:15'),
-(7, 3, 'Sinh tố bơ xoài', 'sinh-to-bo-xoai', 'ST001', 56000.00, 51000.00, 75, '/demo/tienha-drinks/assets/img/products/product_7.jpg', 'Kem mịn, béo vừa phải.', 'Bơ chín và xoài cắt hỏa lọc xay cùng yogurt không đường.', 'Calories: 260 | Đường: 20g', 1, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:16'),
-(8, 3, 'Sinh tố dâu chuối', 'sinh-to-dau-chuoi', 'ST002', 58000.00, NULL, 60, '/demo/tienha-drinks/assets/img/products/product_8.jpg', 'Ngọt dịu, no lâu.', 'Dâu tây tươi, chuối chín, sữa hạt hạnh nhân.', 'Calories: 240 | Đường: 19g', 1, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:16'),
-(9, 4, 'Trà đào cam sả', 'tra-dao-cam-sa', 'TT001', 46000.00, 42000.00, 95, '/demo/tienha-drinks/assets/img/products/product_9.jpg', 'Thơm mùi cam sả, trà đen nhẹ.', 'Trà đào với topping đào ngâm, thích hợp ngày nắng nóng.', 'Calories: 130 | Đường: 15g', 1, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:17'),
-(10, 5, 'Sữa chua granola trái cây', 'sua-chua-granola-trai-cay', 'SC001', 62000.00, 59000.00, 40, '/demo/tienha-drinks/assets/img/products/product_10.jpg', 'Giàu chất xơ và probiotic.', 'Sữa chua nhà làm ăn kèm granola, xoài, dâu và kiwi.', 'Calories: 280 | Đường: 22g', 0, 1, '2026-07-07 20:48:33', '2026-07-14 06:04:18');
+(1, 1, 'Trà sữa sương sáo', 'tra-sua-suong-sao', 'TS001', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-suong-sao.png', 'Vị đậm, thơm mạnh, ít ngọt.', 'Cà phê nguyên chất phơi đá viên, phù hợp cho ngày cần tỉnh táo.', 'Calories: 100 | Đường: 20g', 1, 1, '2026-07-07 20:48:33', '2026-07-17 07:27:52'),
+(2, 1, 'Trà sữa Đại Hồng Bào', 'tra-sua-dai-hong-bao', 'TS002', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-dai-hong-bao.png', 'Sữa nhiều hơn cà phê, vị nhẹ.', 'Bạc xỉu phối sữa tươi và top cream mịn, dễ uống cho người mới bắt đầu.', 'Calories: 100 | Đường: 20g', 1, 1, '2026-07-07 20:48:33', '2026-07-17 07:28:01'),
+(3, 1, 'Trà sữa gạo rang Đài Loan', 'tra-sua-gao-rang-dai-loan', 'TS003', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-gao-rang-dai-loan.png', 'Cân bằng giữa sữa và espresso.', 'Latte đá cho vị mềm, hậu vị cà phê rõ nhưng không gắt.', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-07 20:48:33', '2026-07-17 07:28:12'),
+(4, 1, 'Trà sữa gạo matcha', 'tra-sua-gao-matcha', 'TS004', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-gao-matcha.png', 'Vitamin C cao, vị thanh mát.', 'Kết hợp cam ngọt và dứa tươi, giúp giải nhiệt nhanh.', 'Calories: 100 | Đường: 20g', 1, 1, '2026-07-07 20:48:33', '2026-07-17 07:28:29'),
+(5, 1, 'Trà sữa gạo mật ong', 'tra-sua-gao-mat-ong', 'TS005', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-gao-mat-ong.png', 'Hương vị nhiệt đới, chua ngọt hài hòa.', 'Nước ép ổi và kiwi tươi, bổ sung chất xơ và khoáng chất.', 'Calories: 100 | Đường: 20g', 1, 1, '2026-07-07 20:48:33', '2026-07-17 07:28:42'),
+(6, 1, 'Trà sữa Mật Hương (Chính Sơn tiểu chủng)', 'tra-sua-mat-huong', 'TS006', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-mat-huong.png', 'Thanh lọc cơ thể, ít ngọt.', 'Công thức thanh lọc với táo xanh, cần tây và lá bạc hà.', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-07 20:48:33', '2026-07-17 07:28:52'),
+(7, 1, 'Trà sữa Đài Loan hoa Sơn Trà', 'tra-sua-dai-loan-hoa-son-tra', 'TS007', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-dai-loan-hoa-son-tra.png', 'Thơm mùi cam sả, trà đen nhẹ.', 'Trà đào với topping đào ngâm, thích hợp ngày nắng nóng.', 'Calories: 100 | Đường: 20g', 1, 1, '2026-07-07 20:48:33', '2026-07-17 07:28:59'),
+(8, 1, 'Trà sữa Đài Loan hoa Mộc Tê', 'tra-sua-dai-loan-hoa-moc-te', 'TS008', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-dai-loan-hoa-moc-te.png', 'Giàu chất xơ và probiotic.', 'Sữa chua nhà làm ăn kèm granola, xoài, dâu và kiwi.', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-07 20:48:33', '2026-07-17 07:29:10'),
+(9, 1, 'Trà sữa Đài Loan vị Cherry', 'tra-sua-dai-loan-vi-cherry', 'TS009', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-dai-loan-vi-cherry.png', 'Giàu chất xơ và probiotic.', 'Sữa chua nhà làm ăn kèm granola, xoài, dâu và kiwi.', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-07 20:48:33', '2026-07-17 07:29:19'),
+(10, 1, 'Trà sữa Đài Loan vị Nhãn', 'tra-sua-dai-loan-vi-nhan', 'TS010', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-dai-loan-vi-nhan.png', 'Giàu chất xơ và probiotic.', 'Sữa chua nhà làm ăn kèm granola, xoài, dâu và kiwi.', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-07 20:48:33', '2026-07-17 07:29:29'),
+(11, 1, 'Trà sữa kem trứng', 'tra-sua-kem-trung', 'TS011', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-sua-kem-trung.png', 'Giàu chất xơ và probiotic.', 'Sữa chua nhà làm ăn kèm granola, xoài, dâu và kiwi.', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-07 20:48:33', '2026-07-17 07:29:38'),
+(12, 1, 'Hồng trà sữa truyền thống (đậm vị trà)', 'hong-tra-sua-truyen-thong', 'TS012', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/hong-tra-sua-truyen-thong.png', 'Giàu chất xơ và probiotic.', 'Sữa chua nhà làm ăn kèm granola, xoài, dâu và kiwi.', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-07 20:48:33', '2026-07-17 07:29:47'),
+(13, 1, 'Olong trà sữa truyền thống (đậm vị trà)', 'olong-tra-sua-truyen-thong', 'TS013', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/olong-tra-sua-truyen-thong.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(14, 1, 'Sữa tươi trân châu đường đen', 'sua-tuoi-tran-chan-duong-den', 'TS014', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/sua-tuoi-tran-chan-duong-den.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(15, 2, 'Trà đào', 'tra-dao', 'TD001', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-dao.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(16, 2, 'Trà nhãn', 'tra-nhan', 'TD002', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-nhan.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(17, 2, 'Trà tắc', 'tra-tac', 'TD003', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-tac.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(18, 2, 'Trài chanh', 'tra-chanh', 'TD004', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-chanh.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(19, 2, 'Trà mận', 'tra-man', 'TD005', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-man.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(20, 2, 'Trà hoa bụt giấm', 'tra-hoa-but-giam', 'TD006', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-hoa-but-giam.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(21, 2, 'Trà ổi hồng', 'tra-oi-hong', 'TD007', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-oi-hong.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(22, 2, 'Trà mơ đào', 'tra-mo-dao', 'TD008', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-mo-dao.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(23, 2, 'Trà thơm', 'tra-thom', 'TD009', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-thom.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(24, 2, 'Trà dưa lưới', 'tra-dua-luoi', 'TD010', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-dua-luoi.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(25, 2, 'Trà mãng cầu', 'tra-mang-cau', 'TD011', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-mang-cau.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(26, 2, 'Trà dâu tây', 'tra-dau-tay', 'TD012', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-dau-tay.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(27, 2, 'Trà me', 'tra-me', 'TD013', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-me.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(28, 2, 'Trà cóc', 'tra-coc', 'TD014', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-coc.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01'),
+(29, 2, 'Trà lài đác thơm', 'tra-lai-dac-thom', 'TD015', '30000.00', '25000.00', 1000, '/demo/tienha-drinks/assets/img/products/tra-lai-dac-thom.png', '', '', 'Calories: 100 | Đường: 20g', 0, 1, '2026-07-17 07:21:40', '2026-07-17 07:24:01');
 
 -- --------------------------------------------------------
 
@@ -348,10 +367,10 @@ CREATE TABLE `reward_catalog` (
   `id` int(10) UNSIGNED NOT NULL,
   `reward_name` varchar(120) NOT NULL,
   `required_points` int(11) NOT NULL,
-  `stock` int(11) NOT NULL DEFAULT 0,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `stock` int(11) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `reward_catalog`
@@ -374,8 +393,8 @@ CREATE TABLE `reward_redemptions` (
   `reward_id` int(10) UNSIGNED NOT NULL,
   `points_used` int(11) NOT NULL,
   `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `reward_redemptions`
@@ -552,7 +571,7 @@ ALTER TABLE `points_transactions`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `reward_catalog`

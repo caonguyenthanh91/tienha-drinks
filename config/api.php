@@ -11,7 +11,7 @@ $action = $_GET['action'] ?? '';
 try {
 	if ($action === 'product') {
 		$id = (int)($_GET['id'] ?? 0);
-		$product = get_product_by_id($id);
+		$product = get_product_by_id_for_display($id);
 
 		if (!$product) {
 			http_response_code(404);
@@ -30,6 +30,7 @@ try {
 				'thumbnail' => $product['thumbnail'],
 				'description' => $product['description'],
 				'category_name' => $product['category_name'],
+				'is_active' => (int)($product['is_active'] ?? 1) === 1,
 			],
 		]);
 		exit;
@@ -43,6 +44,19 @@ try {
 		if ($id <= 0) {
 			http_response_code(422);
 			echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
+			exit;
+		}
+
+		$productForCart = get_product_by_id_for_display($id);
+		if (!$productForCart) {
+			http_response_code(404);
+			echo json_encode(['success' => false, 'message' => 'Sản phẩm không tồn tại']);
+			exit;
+		}
+
+		if ((int)($productForCart['is_active'] ?? 1) !== 1) {
+			http_response_code(409);
+			echo json_encode(['success' => false, 'message' => 'Món này đang tạm ngưng bán']);
 			exit;
 		}
 
@@ -91,6 +105,7 @@ try {
 				'success' => false,
 				'message' => 'Số điện thoại không hợp lệ',
 				'tier' => null,
+				'customer' => null,
 				'discount' => 0,
 			]);
 			exit;
@@ -103,6 +118,7 @@ try {
 				'success' => false,
 				'message' => 'Khách hàng mới',
 				'tier' => null,
+				'customer' => null,
 				'discount' => 0,
 			]);
 			exit;
@@ -119,6 +135,12 @@ try {
 				'id' => $tierId,
 				'name' => $tierName,
 				'discount_percent' => $discount,
+			],
+			'customer' => [
+				'full_name' => (string)($customer['full_name'] ?? ''),
+				'email' => (string)($customer['email'] ?? ''),
+				'default_address' => (string)($customer['default_address'] ?? ''),
+				'phone' => (string)($customer['phone'] ?? ''),
 			],
 			'discount' => $discount,
 		]);

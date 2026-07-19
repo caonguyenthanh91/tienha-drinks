@@ -67,9 +67,15 @@ $products = get_products($category ?: null, $keyword !== '' ? $keyword : null, $
                                     <?php endif; ?>
                                     <span class="new-price"><?= e(format_currency($price)) ?></span>
                                 </div>
-                                <button class="btn btn-success btn-sm mt-auto add-cart-btn" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">
-                                    <span>Thêm vào giỏ</span>
-                                </button>
+                                <?php if ((int)($product['is_active'] ?? 1) === 1): ?>
+                                    <button class="btn btn-success btn-sm mt-auto add-cart-btn" onclick="addToCart(<?= (int)$product['id'] ?>, 1)">
+                                        <span>Thêm vào giỏ</span>
+                                    </button>
+                                <?php else: ?>
+                                    <button class="btn btn-secondary btn-sm mt-auto add-cart-btn" type="button" disabled>
+                                        <span>Tạm ngưng</span>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

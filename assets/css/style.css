@@ -333,9 +333,11 @@ h1, h2, h3, h4, h5, h6,
 }
 
 .product-thumb img {
-    height: 210px;
+    aspect-ratio: 1 / 1;
     width: 100%;
-    object-fit: cover;
+    height: auto;
+    object-fit: contain;
+    background: #f6f7f5;
     transition: transform 0.5s ease;
 }
 
@@ -351,19 +353,19 @@ h1, h2, h3, h4, h5, h6,
     font-weight: 700;
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
-    color: #fff;
+    color: var(--brand-700);
+    border: 1.5px solid var(--brand-600);
+    background: rgba(210, 249, 223, 0.75);
+    /* -webkit-backdrop-filter: blur(3px); */
+    /* backdrop-filter: blur(3px); */
 }
 
 .badge-sale {
     left: 10px;
-    background: #ef4444;
 }
 
 .badge-hot {
     right: 10px;
-    background: rgba(0, 0, 0, 0.55);
-    -webkit-backdrop-filter: blur(3px);
-    backdrop-filter: blur(3px);
 }
 
 .quick-view-btn {
@@ -495,21 +497,22 @@ h1, h2, h3, h4, h5, h6,
 
 /* ============ SCROLL REVEAL ============ */
 [data-reveal] {
-    opacity: 0;
-    transform: translateY(30px);
+    opacity: 1;
+    transform: none;
+}
+
+html.js [data-reveal] {
     transition: opacity 0.7s ease, transform 0.7s ease;
     transition-delay: var(--delay, 0s);
 }
 
-[data-reveal].is-visible {
+html.js [data-reveal].is-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
     [data-reveal] {
-        opacity: 1;
-        transform: none;
         transition: none;
     }
 }
@@ -550,7 +553,6 @@ h1, h2, h3, h4, h5, h6,
 @media (max-width: 991px) {
     .hero-caption { text-align: left; }
     .cat-tile { height: 170px; }
-    .product-thumb img { height: 175px; }
     .cta-banner { padding: 1.8rem; }
 }
 
@@ -699,4 +701,41 @@ h1, h2, h3, h4, h5, h6,
     .hero-slide-img { height: 420px; }
     .sidebar { position: static; top: auto; }
     .position-sticky { position: static; }
+}
+
+/* ============ ADMIN ORDERS ============ */
+.admin-status-actions {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.admin-touch-btn {
+    min-height: 44px;
+    font-weight: 600;
+    padding: 0.45rem 0.7rem;
+}
+
+.admin-note-input {
+    min-height: 86px;
+    resize: vertical;
+}
+
+.admin-order-filter .btn {
+    min-height: 42px;
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .admin-status-actions {
+        gap: 0.5rem;
+    }
+
+    .admin-touch-btn {
+        min-height: 48px;
+    }
+
+    .admin-note-input {
+        min-height: 96px;
+    }
 }
