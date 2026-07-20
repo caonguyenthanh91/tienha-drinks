@@ -13,10 +13,20 @@
     --shadow-md: 0 16px 34px rgba(21, 128, 61, 0.14);
 }
 
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: "Be Vietnam Pro", sans-serif;
     color: var(--text-900);
     background: radial-gradient(circle at top left, var(--brand-50), #ffffff 20%);
+}
+
+.site-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6,
@@ -27,6 +37,12 @@ h1, h2, h3, h4, h5, h6,
 /* Remove default top padding of main on home so the hero sits flush */
 .main-content {
     overflow-x: hidden;
+    flex: 1;
+}
+
+/* ============ FOOTER ============ */
+.site-footer {
+    margin-top: auto;
 }
 
 /* ============ NAVBAR ============ */

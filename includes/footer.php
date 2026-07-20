@@ -2,8 +2,8 @@
 		<div class="container py-4">
 			<div class="row g-3 align-items-center">
 				<div class="col-md-8">
-					<h6 class="mb-1">M&T Quán - Giải khát mỗi ngày</h6>
-					<p class="mb-0 text-light-emphasis">Địa chỉ: Khu 15, Bình An, Đồng Nai | Email: hello@tienhadrinks.vn</p>
+				<h6 class="mb-1"><a href="<?= e(app_url('index.php?page=admin_login')) ?>" class="text-decoration-none text-white">M&T Quán - Giải khát mỗi ngày</a></h6>
+				<p class="mb-0 text-white">Địa chỉ: Khu 15, Bình An, Đồng Nai | Email: hello@tienhadrinks.vn</p>
 				</div>
 				<div class="col-md-4 text-md-end">
 					<a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-light btn-sm">Liên hệ hợp tác</a>

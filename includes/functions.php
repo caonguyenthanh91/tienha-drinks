@@ -488,7 +488,7 @@ function award_customer_points_for_completed_order(PDO $pdo, array $order): void
 	}
 
 	$finalTotal = (float)($order['final_total'] ?? 0);
-	$pointsToAdd = (int)floor($finalTotal / 10000);
+	$pointsToAdd = (int)floor($finalTotal / 100);
 
 	$stmtCustomer = $pdo->prepare('UPDATE customers SET points = points + :points, total_spending = total_spending + :spending WHERE id = :id');
 	$stmtCustomer->execute([

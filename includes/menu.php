@@ -13,6 +13,7 @@ $menus = [
 	'admin_dashboard' => 'Dashboard',
 	'admin_orders' => 'Đơn hàng',
 	'admin_products' => 'QL sản phẩm',
+	'admin_feedback' => 'Phản hồi',
 ];
 ?>
 <nav class="navbar navbar-expand-lg app-navbar sticky-top">
@@ -25,7 +26,7 @@ $menus = [
 		<div class="collapse navbar-collapse" id="mainNav">
 			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 				<?php foreach ($menus as $key => $label): ?>
-					<?php if ($key !== 'cart' && (!in_array($key, ['admin_dashboard', 'admin_orders', 'admin_products'], true) || is_admin_authenticated())): ?>
+					<?php if ($key !== 'cart' && (!in_array($key, ['admin_dashboard', 'admin_orders', 'admin_products', 'admin_feedback'], true) || is_admin_authenticated())): ?>
 						<li class="nav-item">
 							<a class="nav-link <?= $page === $key ? 'active' : '' ?>" href="<?= e(app_url('index.php?page=' . $key)) ?>"><?= e($label) ?></a>
 						</li>

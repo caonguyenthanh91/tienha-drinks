@@ -189,7 +189,9 @@ $topProducts = $stmtTopProducts->fetchAll();
                                 <?php foreach ($orders as $order): ?>
                                     <tr>
                                         <td>
-                                            <strong><?= e($order['order_code']) ?></strong>
+                                            <button type="button" class="btn btn-link p-0 text-decoration-none order-detail-trigger" data-order-id="<?= (int)$order['id'] ?>" data-bs-toggle="modal" data-bs-target="#orderDetailModal" style="font-size: inherit;">
+                                                <strong><?= e($order['order_code']) ?></strong>
+                                            </button>
                                             <small class="d-block text-muted"><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></small>
                                         </td>
                                         <td>
@@ -248,3 +250,110 @@ $topProducts = $stmtTopProducts->fetchAll();
         </div>
     </div>
 </div>
+
+<!-- Modal chi tiết đơn hàng -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="orderDetailLoading" class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+                <div id="orderDetailContent" style="display: none;">
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Mã đơn</h6>
+                        <p class="mb-0 fw-bold" id="orderCode"></p>
+                    </div>
+                    <h6 class="text-muted mb-3">Danh sách sản phẩm</h6>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tên hàng</th>
+                                    <th class="text-center">SL</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderItemsTable">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-light border">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Tổng cộng:</span>
+                            <span class="fw-bold text-success fs-5" id="orderTotal"></span>
+                        </div>
+                    </div>
+                </div>
+                <div id="orderDetailError" class="alert alert-danger" style="display: none;">
+                    Không thể tải thông tin đơn hàng. Vui lòng thử lại.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const orderDetailModal = document.getElementById('orderDetailModal');
+    if (orderDetailModal) {
+        orderDetailModal.addEventListener('show.bs.modal', async (e) => {
+            const trigger = e.relatedTarget;
+            const orderId = trigger?.dataset?.orderId;
+
+            if (!orderId) return;
+
+            const loadingEl = document.getElementById('orderDetailLoading');
+            const contentEl = document.getElementById('orderDetailContent');
+            const errorEl = document.getElementById('orderDetailError');
+
+            loadingEl.style.display = 'block';
+            contentEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch(`<?= app_url('includes/api_order_details.php') ?>?order_id=${orderId}`);
+                if (!response.ok) throw new Error('Network error');
+                
+                const data = await response.json();
+                if (!data.success) throw new Error('Invalid data');
+
+                // Điền dữ liệu
+                document.getElementById('orderCode').textContent = data.order_code;
+                document.getElementById('orderTotal').textContent = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(data.final_total);
+
+                const itemsTable = document.getElementById('orderItemsTable');
+                itemsTable.innerHTML = '';
+                
+                data.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.product_name}</td>
+                        <td class="text-center">${item.quantity}</td>
+                        <td class="text-end">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.unit_price)}</td>
+                        <td class="text-end fw-semibold">${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.line_total)}</td>
+                    `;
+                    itemsTable.appendChild(row);
+                });
+
+                loadingEl.style.display = 'none';
+                contentEl.style.display = 'block';
+            } catch (err) {
+                console.error('Error loading order details:', err);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+            }
+        });
+    }
+});
+</script>

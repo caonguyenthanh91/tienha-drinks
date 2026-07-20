@@ -17,6 +17,7 @@ $allowedPages = [
 	'admin_dashboard',
 	'admin_orders',
 	'admin_products',
+	'admin_feedback',
 ];
 
 $page = $_GET['page'] ?? 'home';
@@ -24,7 +25,7 @@ if (!in_array($page, $allowedPages, true)) {
 	$page = 'home';
 }
 
-$adminPages = ['admin_dashboard', 'admin_orders', 'admin_products'];
+$adminPages = ['admin_dashboard', 'admin_orders', 'admin_products', 'admin_feedback'];
 if (in_array($page, $adminPages, true) && !is_admin_authenticated()) {
 	header('Location: ' . app_url('index.php?page=admin_login&redirect=' . urlencode($page)));
 	exit;
