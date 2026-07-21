@@ -189,14 +189,23 @@ $topProducts = $stmtTopProducts->fetchAll();
                                 <?php foreach ($orders as $order): ?>
                                     <tr>
                                         <td>
+                                            <?php
+                                                $scheduledAtRaw = (string)$order['created_at'];
+                                                $scheduledAtLabel = date('d/m/Y H:i', strtotime($scheduledAtRaw));
+                                            ?>
                                             <button type="button" class="btn btn-link p-0 text-decoration-none order-detail-trigger" data-order-id="<?= (int)$order['id'] ?>" data-bs-toggle="modal" data-bs-target="#orderDetailModal" style="font-size: inherit;">
                                                 <strong><?= e($order['order_code']) ?></strong>
                                             </button>
-                                            <small class="d-block text-muted"><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></small>
+                                            <small class="d-block dashboard-order-meta-label">Lịch hẹn giao</small>
+                                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                                <small class="d-inline-flex align-items-center dashboard-order-chip"><?= e($scheduledAtLabel) ?></small>
+                                                <span class="badge <?= e(order_delivery_timing_badge_class($scheduledAtRaw)) ?>"><?= e(order_delivery_timing_label($scheduledAtRaw)) ?></span>
+                                            </div>
                                         </td>
                                         <td>
                                             <?= e($order['customer_name']) ?>
                                             <small class="d-block text-muted"><?= e($order['customer_phone']) ?></small>
+                                            <small class="d-block text-muted"><?= e(payment_method_label((string)$order['payment_method'])) ?></small>
                                         </td>
                                         <td>
                                             <span class="badge <?= e(order_status_badge_class((string)$order['status'])) ?>">
@@ -266,9 +275,19 @@ $topProducts = $stmtTopProducts->fetchAll();
                     </div>
                 </div>
                 <div id="orderDetailContent" style="display: none;">
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Mã đơn</h6>
-                        <p class="mb-0 fw-bold" id="orderCode"></p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Mã đơn</h6>
+                            <p class="mb-0 fw-bold" id="orderCode"></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Thời gian đặt trước</h6>
+                            <p class="mb-0 fw-semibold" id="orderScheduledAt"></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Phương thức thanh toán</h6>
+                            <p class="mb-0" id="orderPaymentMethod"></p>
+                        </div>
                     </div>
                     <h6 class="text-muted mb-3">Danh sách sản phẩm</h6>
                     <div class="table-responsive mb-3">
@@ -327,6 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Điền dữ liệu
                 document.getElementById('orderCode').textContent = data.order_code;
+                document.getElementById('orderScheduledAt').textContent = new Date(data.scheduled_at).toLocaleString('vi-VN');
+                document.getElementById('orderPaymentMethod').textContent = data.payment_method_label;
                 document.getElementById('orderTotal').textContent = new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
@@ -357,3 +378,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
+<style>
+.dashboard-order-meta-label {
+    margin-top: 0.35rem;
+    color: #6c7a72;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.dashboard-order-chip {
+    margin-top: 0.2rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(24, 119, 73, 0.1);
+    color: #174c33;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+</style>

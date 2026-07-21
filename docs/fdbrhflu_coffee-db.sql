@@ -113,6 +113,8 @@ CREATE TABLE `contact_messages` (
   `phone` varchar(20) NOT NULL,
   `email` varchar(180) DEFAULT NULL,
   `message` text NOT NULL,
+  `admin_reply` text,
+  `admin_reply_at` datetime DEFAULT NULL,
   `status` enum('new','processing','done') NOT NULL DEFAULT 'new',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -121,9 +123,9 @@ CREATE TABLE `contact_messages` (
 -- Dumping data for table `contact_messages`
 --
 
-INSERT INTO `contact_messages` (`id`, `full_name`, `phone`, `email`, `message`, `status`, `created_at`) VALUES
-(1, 'Phạm Nhật Linh', '0908000010', 'linh.pham@example.com', 'Tôi muốn đặt 20 ly cho sự kiện văn phòng vào thứ 6.', 'new', '2026-07-05 11:00:00'),
-(2, 'Đỗ Minh Quân', '0908000011', NULL, 'Cho mình xin bảng giá giao số lượng lớn cho khách đoàn.', 'processing', '2026-07-06 08:30:00');
+INSERT INTO `contact_messages` (`id`, `full_name`, `phone`, `email`, `message`, `admin_reply`, `admin_reply_at`, `status`, `created_at`) VALUES
+(1, 'Phạm Nhật Linh', '0908000010', 'linh.pham@example.com', 'Tôi muốn đặt 20 ly cho sự kiện văn phòng vào thứ 6.', NULL, NULL, 'new', '2026-07-05 11:00:00'),
+(2, 'Đỗ Minh Quân', '0908000011', NULL, 'Cho mình xin bảng giá giao số lượng lớn cho khách đoàn.', 'Shop đã nhận yêu cầu và sẽ gửi bảng giá sỉ qua điện thoại trong hôm nay.', '2026-07-06 10:15:00', 'done', '2026-07-06 08:30:00');
 
 -- --------------------------------------------------------
 

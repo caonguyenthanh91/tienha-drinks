@@ -25,6 +25,21 @@ function current_page(): string
 	return $_GET['page'] ?? 'home';
 }
 
+function normalize_phone_digits(string $phone): string
+{
+	return preg_replace('/\D+/', '', $phone) ?? '';
+}
+
+function remembered_phone_cookie_name(): string
+{
+	return 'tienha_phone';
+}
+
+function remembered_phone_value(): string
+{
+	return normalize_phone_digits((string)($_COOKIE[remembered_phone_cookie_name()] ?? ''));
+}
+
 function admin_session_user(): ?array
 {
 	$user = $_SESSION['user'] ?? null;
@@ -403,6 +418,33 @@ function order_status_badge_class(string $status): string
 		'cancelled' => 'text-bg-danger',
 		default => 'text-bg-secondary',
 	};
+}
+
+function payment_method_label(string $paymentMethod): string
+{
+	return match ($paymentMethod) {
+		'cod' => 'Thanh toán khi nhận hàng (COD)',
+		'bank_transfer' => 'Chuyển khoản ngân hàng',
+		'momo' => 'Ví MoMo',
+		default => $paymentMethod,
+	};
+}
+
+function order_delivery_timing_label(string $scheduledAt): string
+{
+	$scheduledTimestamp = strtotime($scheduledAt);
+	if ($scheduledTimestamp === false) {
+		return 'Giao ngay';
+	}
+
+	return $scheduledTimestamp > time() ? 'Đặt trước' : 'Giao ngay';
+}
+
+function order_delivery_timing_badge_class(string $scheduledAt): string
+{
+	return order_delivery_timing_label($scheduledAt) === 'Đặt trước'
+		? 'text-bg-primary'
+		: 'text-bg-secondary';
 }
 
 function allowed_next_order_statuses(string $currentStatus): array

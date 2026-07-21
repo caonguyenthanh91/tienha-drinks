@@ -2,7 +2,11 @@
 declare(strict_types=1);
 
 $tiers = get_customer_tiers();
+$rememberedPhone = preg_replace('/\D+/', '', (string)($_COOKIE['tienha_phone'] ?? '')) ?? '';
 $phoneInput = trim((string)($_GET['phone'] ?? ''));
+if ($phoneInput === '' && $rememberedPhone !== '') {
+    $phoneInput = $rememberedPhone;
+}
 $normalizedPhone = preg_replace('/\D+/', '', $phoneInput) ?? '';
 $searched = array_key_exists('phone', $_GET);
 $errorMessage = '';
@@ -17,13 +21,13 @@ if ($searched) {
         $customer = get_customer_by_phone($normalizedPhone);
 
         if ($customer) {
-            $stmtOrders = db()->prepare('SELECT id, order_code, status, final_total, created_at, customer_name, customer_email, shipping_address, note FROM orders WHERE customer_id = :customer_id OR customer_phone = :phone ORDER BY id DESC LIMIT 10');
+            $stmtOrders = db()->prepare('SELECT id, order_code, status, final_total, created_at, payment_method, customer_name, customer_email, shipping_address, note FROM orders WHERE customer_id = :customer_id OR customer_phone = :phone ORDER BY id DESC LIMIT 10');
             $stmtOrders->execute([
                 ':customer_id' => (int)$customer['id'],
                 ':phone' => $normalizedPhone,
             ]);
         } else {
-            $stmtOrders = db()->prepare('SELECT id, order_code, status, final_total, created_at, customer_name, customer_email, shipping_address, note FROM orders WHERE customer_phone = :phone ORDER BY id DESC LIMIT 10');
+            $stmtOrders = db()->prepare('SELECT id, order_code, status, final_total, created_at, payment_method, customer_name, customer_email, shipping_address, note FROM orders WHERE customer_phone = :phone ORDER BY id DESC LIMIT 10');
             $stmtOrders->execute([':phone' => $normalizedPhone]);
         }
 
@@ -147,6 +151,8 @@ if ($currentOrder === null && $orders !== []) {
                                     <button type="button" class="btn btn-link p-0 text-decoration-none order-detail-trigger" data-order-id="<?= (int)$currentOrder['id'] ?>" data-bs-toggle="modal" data-bs-target="#orderDetailModal" style="font-size: inherit;">
                                         <strong><?= e($currentOrder['order_code']) ?></strong>
                                     </button>
+                                    <small class="text-muted d-block">Lịch hẹn: <?= e(date('d/m/Y H:i', strtotime((string)$currentOrder['created_at']))) ?></small>
+                                    <small class="text-muted d-block">Thanh toán: <?= e(payment_method_label((string)($currentOrder['payment_method'] ?? 'cod'))) ?></small>
                                 </div>
                                 <span class="badge <?= match($currentOrder['status']) {
                                     'pending' => 'text-bg-warning',
@@ -184,6 +190,7 @@ if ($currentOrder === null && $orders !== []) {
                                     <th>Trạng thái</th>
                                     <th class="text-end">Tổng tiền</th>
                                     <th>Ngày tạo</th>
+                                    <th>Thanh toán</th>
                                     <th>Phản hồi cửa hàng</th>
                                     <th class="text-center">Hành động</th>
                                 </tr>
@@ -217,6 +224,7 @@ if ($currentOrder === null && $orders !== []) {
                                         </td>
                                         <td class="text-end fw-bold text-success"><?= e(format_currency((float)$order['final_total'])) ?></td>
                                         <td><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></td>
+                                        <td><small><?= e(payment_method_label((string)($order['payment_method'] ?? 'cod'))) ?></small></td>
                                         <td>
                                             <?php if (trim((string)($order['note'] ?? '')) !== ''): ?>
                                                 <small class="d-block" style="white-space: pre-line;"><?= e((string)$order['note']) ?></small>
@@ -367,9 +375,19 @@ if ($currentOrder === null && $orders !== []) {
                     </div>
                 </div>
                 <div id="orderDetailContent" style="display: none;">
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Mã đơn</h6>
-                        <p class="mb-0 fw-bold" id="orderCode"></p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Mã đơn</h6>
+                            <p class="mb-0 fw-bold" id="orderCode"></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Thời gian đặt trước</h6>
+                            <p class="mb-0 fw-semibold" id="orderScheduledAt"></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Phương thức thanh toán</h6>
+                            <p class="mb-0" id="orderPaymentMethod"></p>
+                        </div>
                     </div>
                     <h6 class="text-muted mb-3">Danh sách sản phẩm</h6>
                     <div class="table-responsive mb-3">
@@ -405,12 +423,29 @@ if ($currentOrder === null && $orders !== []) {
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('accountLookupForm');
     const input = document.getElementById('lookupPhone');
+    const rememberedPhoneCookieName = 'tienha_phone';
+    const rememberedPhoneCookiePath = '<?= e(rtrim(app_url(''), '/')) !== '' ? e(rtrim(app_url(''), '/')) : '/' ?>';
+
+    const persistPhoneCookie = (value) => {
+        const normalizedValue = value.replace(/\D+/g, '');
+        const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+        document.cookie = `${rememberedPhoneCookieName}=${encodeURIComponent(normalizedValue)}; expires=${expires}; path=${rememberedPhoneCookiePath}; SameSite=Lax`;
+    };
+
     if (form && input) {
         const normalize = () => {
             input.value = input.value.replace(/\D+/g, '');
+            if (input.value !== '') {
+                persistPhoneCookie(input.value);
+            }
         };
         input.addEventListener('input', normalize);
-        form.addEventListener('submit', normalize);
+        form.addEventListener('submit', () => {
+            normalize();
+            if (input.value !== '') {
+                persistPhoneCookie(input.value);
+            }
+        });
     }
 
     // Xử lý modal chi tiết đơn hàng
@@ -439,6 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Điền dữ liệu
                 document.getElementById('orderCode').textContent = data.order_code;
+                document.getElementById('orderScheduledAt').textContent = new Date(data.scheduled_at).toLocaleString('vi-VN');
+                document.getElementById('orderPaymentMethod').textContent = data.payment_method_label;
                 document.getElementById('orderTotal').textContent = new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'

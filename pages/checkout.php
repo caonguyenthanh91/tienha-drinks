@@ -6,6 +6,12 @@ $totals = cart_totals();
 $message = '';
 $selectedCouponCode = strtoupper(trim((string)($_SESSION['cart_coupon_code'] ?? '')));
 $selectedCoupon = get_active_coupon_by_code($selectedCouponCode);
+$defaultScheduleDate = date('Y-m-d');
+$defaultScheduleTime = '12:00';
+$scheduleDateValue = $defaultScheduleDate;
+$scheduleTimeValue = $defaultScheduleTime;
+$rememberedPhone = preg_replace('/\D+/', '', (string)($_COOKIE['tienha_phone'] ?? '')) ?? '';
+$phoneValue = $rememberedPhone;
 
 if (!$selectedCoupon) {
     $selectedCouponCode = '';
@@ -17,12 +23,20 @@ $previewPricing = cart_totals_with_discount(0, $selectedCouponCode);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
     $customerName = trim((string)($_POST['customer_name'] ?? ''));
     $phone = trim((string)($_POST['phone'] ?? ''));
+    $phoneValue = $phone;
     $email = trim((string)($_POST['email'] ?? ''));
     $address = trim((string)($_POST['address'] ?? ''));
     $note = trim((string)($_POST['note'] ?? ''));
     $paymentMethod = (string)($_POST['payment_method'] ?? 'cod');
+    $scheduleDateValue = trim((string)($_POST['scheduled_date'] ?? $defaultScheduleDate));
+    $scheduleTimeValue = trim((string)($_POST['scheduled_time'] ?? $defaultScheduleTime));
 
-    if ($customerName !== '' && $phone !== '' && $address !== '') {
+    $scheduledAt = DateTimeImmutable::createFromFormat('Y-m-d H:i', $scheduleDateValue . ' ' . $scheduleTimeValue);
+    $scheduledAtValid = $scheduledAt instanceof DateTimeImmutable
+        && $scheduledAt->format('Y-m-d') === $scheduleDateValue
+        && $scheduledAt->format('H:i') === $scheduleTimeValue;
+
+    if ($customerName !== '' && $phone !== '' && $address !== '' && $scheduledAtValid) {
         $pdo = db();
         $pdo->beginTransaction();
 
@@ -39,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
 
             $totalsWithDiscount = cart_totals_with_discount($discountPercent, $selectedCouponCode);
 
-            $stmtOrder = $pdo->prepare('INSERT INTO orders (order_code, customer_id, customer_name, customer_phone, customer_email, shipping_address, note, payment_method, status, subtotal, shipping_fee, discount_amount, final_total, created_at) VALUES (:order_code, :customer_id, :customer_name, :customer_phone, :customer_email, :shipping_address, :note, :payment_method, :status, :subtotal, :shipping_fee, :discount_amount, :final_total, NOW())');
-            $orderCode = 'TH' . date('YmdHis') . random_int(10, 99);
+            $stmtOrder = $pdo->prepare('INSERT INTO orders (order_code, customer_id, customer_name, customer_phone, customer_email, shipping_address, note, payment_method, status, subtotal, shipping_fee, discount_amount, final_total, created_at) VALUES (:order_code, :customer_id, :customer_name, :customer_phone, :customer_email, :shipping_address, :note, :payment_method, :status, :subtotal, :shipping_fee, :discount_amount, :final_total, :created_at)');
+            $orderCode = 'TH' . $scheduledAt->format('YmdHis') . random_int(10, 99);
             $stmtOrder->execute([
                 ':order_code' => $orderCode,
                 ':customer_id' => $customerId,
@@ -55,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
                 ':shipping_fee' => $totalsWithDiscount['shipping'],
                 ':discount_amount' => $totalsWithDiscount['discount'],
                 ':final_total' => $totalsWithDiscount['total'],
+                ':created_at' => $scheduledAt->format('Y-m-d H:i:s'),
             ]);
             $orderId = (int)$pdo->lastInsertId();
 
@@ -80,6 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
             $pdo->rollBack();
             $message = 'Không thể tạo đơn hàng: ' . $e->getMessage();
         }
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $message = 'Vui lòng nhập đầy đủ thông tin và chọn ngày giờ đặt trước hợp lệ.';
     }
 }
 ?>
@@ -112,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
                             
                             <div class="col-md-6">
                                 <label class="form-label fw-600">Số điện thoại</label>
-                                <input type="text" name="phone" id="customerPhone" class="form-control" placeholder="0912345678" required>
+                                <input type="text" name="phone" id="customerPhone" class="form-control" placeholder="0912345678" value="<?= e($phoneValue) ?>" required>
                                 <div id="tierDisplay" class="mt-2" style="display: none;">
                                     <small class="d-block text-success fw-600">
                                         <span id="tierIcon">⭐</span>
@@ -136,6 +153,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $items) {
                             <div class="col-12">
                                 <label class="form-label fw-600">Ghi chú cho đơn hàng</label>
                                 <textarea name="note" class="form-control" rows="2" placeholder="Ví dụ: Ít đá, giao giờ hành chính..." maxlength="255"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="schedule-picker-card">
+                                    <div class="schedule-picker-copy">
+                                        <span class="schedule-chip">Đặt trước</span>
+                                        <h6 class="mb-1">Chọn thời điểm giao đơn thật vừa ý</h6>
+                                        <p class="mb-0">Mặc định là hôm nay lúc 12:00 trưa. Hệ thống sẽ dùng mốc này cho ngày giờ đơn hàng.</p>
+                                    </div>
+                                    <div class="row g-3 align-items-end mt-1">
+                                        <div class="col-md-7">
+                                            <label class="form-label fw-600">Ngày nhận hàng</label>
+                                            <input
+                                                type="date"
+                                                name="scheduled_date"
+                                                class="form-control schedule-input"
+                                                value="<?= e($scheduleDateValue) ?>"
+                                                min="<?= e($defaultScheduleDate) ?>"
+                                                required
+                                            >
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label fw-600">Giờ nhận hàng</label>
+                                            <input
+                                                type="time"
+                                                name="scheduled_time"
+                                                class="form-control schedule-input"
+                                                value="<?= e($scheduleTimeValue) ?>"
+                                                step="300"
+                                                required
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-600">Phương thức thanh toán</label>
@@ -217,10 +267,27 @@ const paymentMethodSelect = document.getElementById('paymentMethodSelect');
 const bankTransferQrWrap = document.getElementById('bankTransferQrWrap');
 const checkoutForm = document.getElementById('checkoutForm');
 const checkoutSubmitBtn = document.getElementById('checkoutSubmitBtn');
+const scheduledDateInput = checkoutForm?.querySelector('input[name="scheduled_date"]') || null;
+const scheduledTimeInput = checkoutForm?.querySelector('input[name="scheduled_time"]') || null;
+const rememberedPhoneCookieName = 'tienha_phone';
+const rememberedPhoneCookiePath = '<?= e(rtrim(app_url(''), '/')) !== '' ? e(rtrim(app_url(''), '/')) : '/' ?>';
 let allowCheckoutSubmit = false;
+
+function persistPhoneCookie(value) {
+    const normalizedValue = String(value || '').replace(/\D+/g, '');
+    if (normalizedValue === '') {
+        return;
+    }
+
+    const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `${rememberedPhoneCookieName}=${encodeURIComponent(normalizedValue)}; expires=${expires}; path=${rememberedPhoneCookiePath}; SameSite=Lax`;
+}
 
 if (checkoutSubmitBtn) {
     checkoutSubmitBtn.addEventListener('click', function () {
+        if (phoneInput) {
+            persistPhoneCookie(phoneInput.value);
+        }
         allowCheckoutSubmit = true;
     });
 }
@@ -244,13 +311,75 @@ if (checkoutForm) {
     });
 
     checkoutForm.addEventListener('submit', function (event) {
+        syncScheduledTimeConstraints();
+
+        if (scheduledTimeInput && !scheduledTimeInput.checkValidity()) {
+            event.preventDefault();
+            scheduledTimeInput.reportValidity();
+            allowCheckoutSubmit = false;
+            return;
+        }
+
         if (!allowCheckoutSubmit) {
             event.preventDefault();
             return;
         }
 
+        if (phoneInput) {
+            persistPhoneCookie(phoneInput.value);
+        }
+
         allowCheckoutSubmit = false;
     });
+}
+
+function getRoundedCurrentTime() {
+    const now = new Date();
+    now.setSeconds(0, 0);
+
+    const minutes = now.getMinutes();
+    const roundedMinutes = Math.ceil(minutes / 5) * 5;
+    now.setMinutes(roundedMinutes);
+
+    const tomorrow = new Date();
+    tomorrow.setHours(24, 0, 0, 0);
+
+    return {
+        minTime: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+        spillsToNextDay: now >= tomorrow,
+    };
+}
+
+function syncScheduledTimeConstraints() {
+    if (!scheduledDateInput || !scheduledTimeInput) {
+        return;
+    }
+
+    const today = new Date();
+    const todayValue = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    if (scheduledDateInput.value === todayValue) {
+        const { minTime, spillsToNextDay } = getRoundedCurrentTime();
+
+        if (spillsToNextDay) {
+            scheduledTimeInput.min = '00:00';
+            scheduledTimeInput.setCustomValidity('Hôm nay đã qua khung giờ nhận đơn. Vui lòng chọn ngày giao tiếp theo.');
+            return;
+        }
+
+        scheduledTimeInput.min = minTime;
+
+        if (scheduledTimeInput.value !== '' && scheduledTimeInput.value < minTime) {
+            scheduledTimeInput.setCustomValidity('Vui lòng chọn giờ hiện tại hoặc muộn hơn cho đơn giao hôm nay.');
+        } else {
+            scheduledTimeInput.setCustomValidity('');
+        }
+
+        return;
+    }
+
+    scheduledTimeInput.min = '00:00';
+    scheduledTimeInput.setCustomValidity('');
 }
 
 function toggleBankTransferQr() {
@@ -265,9 +394,16 @@ if (paymentMethodSelect) {
     toggleBankTransferQr();
 }
 
+if (scheduledDateInput && scheduledTimeInput) {
+    scheduledDateInput.addEventListener('change', syncScheduledTimeConstraints);
+    scheduledTimeInput.addEventListener('input', syncScheduledTimeConstraints);
+    syncScheduledTimeConstraints();
+}
+
 if (phoneInput) {
     let checkTimer;
     phoneInput.addEventListener('input', function() {
+        persistPhoneCookie(this.value);
         clearTimeout(checkTimer);
         const phone = this.value.trim();
 
@@ -280,6 +416,10 @@ if (phoneInput) {
 
         checkTimer = setTimeout(() => checkCustomerTier(phone), 500);
     });
+
+    if (phoneInput.value.trim().length >= 7) {
+        checkCustomerTier(phoneInput.value.trim());
+    }
 }
 
 async function checkCustomerTier(phone) {
@@ -371,3 +511,64 @@ function formatVnd(value) {
     return new Intl.NumberFormat('vi-VN').format(Number(value || 0)) + ' VND';
 }
 </script>
+
+<style>
+.schedule-picker-card {
+    position: relative;
+    padding: 1.25rem;
+    border: 1px solid rgba(29, 111, 66, 0.16);
+    border-radius: 1.25rem;
+    background:
+        radial-gradient(circle at top right, rgba(255, 214, 102, 0.35), transparent 35%),
+        linear-gradient(135deg, rgba(242, 117, 76, 0.12), rgba(29, 111, 66, 0.08) 55%, rgba(255, 255, 255, 0.96));
+    box-shadow: 0 20px 45px rgba(29, 111, 66, 0.08);
+    overflow: hidden;
+}
+
+.schedule-picker-copy {
+    margin-bottom: 0.75rem;
+}
+
+.schedule-picker-copy h6 {
+    font-size: 1.05rem;
+    color: #174c33;
+}
+
+.schedule-picker-copy p {
+    color: #5f6f66;
+    font-size: 0.95rem;
+}
+
+.schedule-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    color: #ba5a2a;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+}
+
+.schedule-input {
+    min-height: 3rem;
+    border: 1px solid rgba(29, 111, 66, 0.18);
+    border-radius: 0.95rem;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.schedule-input:focus {
+    border-color: rgba(29, 111, 66, 0.45);
+    box-shadow: 0 0 0 0.2rem rgba(29, 111, 66, 0.12);
+}
+
+@media (max-width: 767.98px) {
+    .schedule-picker-card {
+        padding: 1rem;
+    }
+}
+</style>

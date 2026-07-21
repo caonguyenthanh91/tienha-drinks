@@ -6,6 +6,12 @@ $messageType = 'success';
 
 $selectedDate = trim((string)($_GET['date'] ?? ''));
 $preset = trim((string)($_GET['preset'] ?? ''));
+$deliveryMode = trim((string)($_GET['delivery_mode'] ?? ''));
+
+$validDeliveryModes = ['scheduled', 'immediate'];
+if ($deliveryMode !== '' && !in_array($deliveryMode, $validDeliveryModes, true)) {
+    $deliveryMode = '';
+}
 
 if ($selectedDate !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $selectedDate)) {
     $selectedDate = '';
@@ -42,7 +48,7 @@ switch ($preset) {
         break;
 }
 
-$buildAdminOrdersUrl = static function (array $overrides = []) use ($selectedDate, $preset): string {
+$buildAdminOrdersUrl = static function (array $overrides = []) use ($selectedDate, $preset, $deliveryMode): string {
     $params = [
         'page' => 'admin_orders',
     ];
@@ -52,6 +58,9 @@ $buildAdminOrdersUrl = static function (array $overrides = []) use ($selectedDat
     }
     if ($preset !== '') {
         $params['preset'] = $preset;
+    }
+    if ($deliveryMode !== '') {
+        $params['delivery_mode'] = $deliveryMode;
     }
 
     foreach ($overrides as $key => $value) {
@@ -96,14 +105,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-$query = 'SELECT id, order_code, customer_name, customer_phone, customer_email, shipping_address, payment_method, final_total, status, note, created_at, updated_at FROM orders';
+$whereClauses = ['1=1'];
 $queryParams = [];
 
 if ($rangeStart !== null && $rangeEnd !== null) {
-    $query .= ' WHERE created_at >= :range_start AND created_at < :range_end';
+    $whereClauses[] = 'created_at >= :range_start AND created_at < :range_end';
     $queryParams[':range_start'] = $rangeStart;
     $queryParams[':range_end'] = $rangeEnd;
 }
+
+if ($deliveryMode === 'scheduled') {
+    $whereClauses[] = 'created_at > NOW()';
+} elseif ($deliveryMode === 'immediate') {
+    $whereClauses[] = 'created_at <= NOW()';
+}
+
+$query = 'SELECT id, order_code, customer_name, customer_phone, customer_email, shipping_address, payment_method, final_total, status, note, created_at, updated_at FROM orders WHERE ' . implode(' AND ', $whereClauses);
 
 $query .= ' ORDER BY CASE WHEN status IN ("completed", "cancelled") THEN 1 ELSE 0 END ASC, FIELD(status, "pending", "confirmed", "shipping", "completed", "cancelled") ASC, id DESC LIMIT 120';
 
@@ -113,6 +130,21 @@ $incomingOrders = $stmt->fetchAll();
 
 $activeOrders = [];
 $archivedOrders = [];
+
+$orderTimingLabel = static function (string $scheduledAt): string {
+    $scheduledTimestamp = strtotime($scheduledAt);
+    if ($scheduledTimestamp === false) {
+        return 'Giao ngay';
+    }
+
+    return $scheduledTimestamp > time() ? 'Đặt trước' : 'Giao ngay';
+};
+
+$orderTimingBadgeClass = static function (string $scheduledAt) use ($orderTimingLabel): string {
+    return $orderTimingLabel($scheduledAt) === 'Đặt trước'
+        ? 'text-bg-primary'
+        : 'text-bg-secondary';
+};
 
 foreach ($incomingOrders as $order) {
     if (in_array((string)$order['status'], ['completed', 'cancelled'], true)) {
@@ -152,11 +184,19 @@ foreach ($incomingOrders as $order) {
                     <label for="adminOrderDate" class="form-label mb-1">Ngày</label>
                     <input id="adminOrderDate" type="date" name="date" class="form-control" value="<?= e($selectedDate) ?>">
                 </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label for="adminDeliveryMode" class="form-label mb-1">Loại giao</label>
+                    <select id="adminDeliveryMode" name="delivery_mode" class="form-select">
+                        <option value="">Tất cả</option>
+                        <option value="scheduled" <?= $deliveryMode === 'scheduled' ? 'selected' : '' ?>>Đặt trước</option>
+                        <option value="immediate" <?= $deliveryMode === 'immediate' ? 'selected' : '' ?>>Giao ngay</option>
+                    </select>
+                </div>
                 <div class="col-sm-6 col-lg-3 d-grid d-sm-flex gap-2">
                     <button class="btn btn-success" type="submit">Áp dụng</button>
-                    <a class="btn btn-outline-secondary" href="<?= e($buildAdminOrdersUrl(['date' => null, 'preset' => null])) ?>">Tất cả</a>
+                    <a class="btn btn-outline-secondary" href="<?= e($buildAdminOrdersUrl(['date' => null, 'preset' => null, 'delivery_mode' => null])) ?>">Tất cả</a>
                 </div>
-                <div class="col-12 col-lg-6 d-flex flex-wrap gap-2">
+                <div class="col-12 col-lg-3 d-flex flex-wrap gap-2">
                     <a class="btn <?= $preset === 'yesterday' ? 'btn-dark' : 'btn-outline-dark' ?>" href="<?= e($buildAdminOrdersUrl(['preset' => 'yesterday', 'date' => null])) ?>">Hôm qua</a>
                     <a class="btn <?= $preset === 'today' ? 'btn-success' : 'btn-outline-success' ?>" href="<?= e($buildAdminOrdersUrl(['preset' => 'today', 'date' => null])) ?>">Hôm nay</a>
                     <a class="btn <?= $preset === 'week' ? 'btn-primary' : 'btn-outline-primary' ?>" href="<?= e($buildAdminOrdersUrl(['preset' => 'week', 'date' => null])) ?>">Tuần này</a>
@@ -189,10 +229,18 @@ foreach ($incomingOrders as $order) {
                         <?php foreach ($activeOrders as $order): ?>
                             <tr>
                                 <td>
+                                    <?php
+                                        $scheduledAtRaw = (string)$order['created_at'];
+                                        $scheduledAtLabel = date('d/m/Y H:i', strtotime($scheduledAtRaw));
+                                    ?>
                                     <button type="button" class="btn btn-link p-0 text-decoration-none order-detail-trigger" data-order-id="<?= (int)$order['id'] ?>" data-bs-toggle="modal" data-bs-target="#orderDetailModal" style="font-size: inherit;">
                                         <strong><?= e($order['order_code']) ?></strong>
                                     </button>
-                                    <small class="d-block text-muted"><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></small>
+                                    <small class="d-block admin-scheduled-label">Thời gian đặt trước</small>
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                        <small class="d-inline-flex align-items-center gap-1 admin-scheduled-pill"><?= e($scheduledAtLabel) ?></small>
+                                        <span class="badge <?= e($orderTimingBadgeClass($scheduledAtRaw)) ?>"><?= e($orderTimingLabel($scheduledAtRaw)) ?></span>
+                                    </div>
                                 </td>
                                 <td>
                                     <?= e($order['customer_name']) ?>
@@ -201,7 +249,7 @@ foreach ($incomingOrders as $order) {
                                 </td>
                                 <td>
                                     <small><?= e($order['shipping_address']) ?></small>
-                                    <small class="d-block text-muted">Thanh toán: <?= e((string)$order['payment_method']) ?></small>
+                                    <small class="d-block text-muted">Thanh toán: <?= e(payment_method_label((string)$order['payment_method'])) ?></small>
                                 </td>
                                 <td>
                                     <span class="badge <?= e(order_status_badge_class((string)$order['status'])) ?>">
@@ -276,10 +324,18 @@ foreach ($incomingOrders as $order) {
                         <?php foreach ($archivedOrders as $order): ?>
                             <tr>
                                 <td>
+                                    <?php
+                                        $scheduledAtRaw = (string)$order['created_at'];
+                                        $scheduledAtLabel = date('d/m/Y H:i', strtotime($scheduledAtRaw));
+                                    ?>
                                     <button type="button" class="btn btn-link p-0 text-decoration-none order-detail-trigger" data-order-id="<?= (int)$order['id'] ?>" data-bs-toggle="modal" data-bs-target="#orderDetailModal" style="font-size: inherit;">
                                         <strong><?= e($order['order_code']) ?></strong>
                                     </button>
-                                    <small class="d-block text-muted"><?= e(date('d/m/Y H:i', strtotime((string)$order['created_at']))) ?></small>
+                                    <small class="d-block admin-scheduled-label">Thời gian đặt trước</small>
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                        <small class="d-inline-flex align-items-center gap-1 admin-scheduled-pill"><?= e($scheduledAtLabel) ?></small>
+                                        <span class="badge <?= e($orderTimingBadgeClass($scheduledAtRaw)) ?>"><?= e($orderTimingLabel($scheduledAtRaw)) ?></span>
+                                    </div>
                                 </td>
                                 <td>
                                     <?= e($order['customer_name']) ?>
@@ -323,9 +379,20 @@ foreach ($incomingOrders as $order) {
                     </div>
                 </div>
                 <div id="orderDetailContent" style="display: none;">
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Mã đơn</h6>
-                        <p class="mb-0 fw-bold" id="orderCode"></p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Mã đơn</h6>
+                            <p class="mb-0 fw-bold" id="orderCode"></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Thời gian đặt trước</h6>
+                            <p class="mb-1 fw-semibold" id="orderScheduledAt"></p>
+                            <span class="badge" id="orderDeliveryTimingBadge"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Phương thức thanh toán</h6>
+                            <p class="mb-0" id="orderPaymentMethod"></p>
+                        </div>
                     </div>
                     <h6 class="text-muted mb-3">Danh sách sản phẩm</h6>
                     <div class="table-responsive mb-3">
@@ -384,6 +451,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Điền dữ liệu
                 document.getElementById('orderCode').textContent = data.order_code;
+                document.getElementById('orderScheduledAt').textContent = new Date(data.scheduled_at).toLocaleString('vi-VN');
+                const deliveryBadge = document.getElementById('orderDeliveryTimingBadge');
+                deliveryBadge.className = `badge ${data.delivery_timing_badge_class}`;
+                deliveryBadge.textContent = data.delivery_timing_label;
+                document.getElementById('orderPaymentMethod').textContent = data.payment_method_label;
                 document.getElementById('orderTotal').textContent = new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
@@ -414,3 +486,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
+<style>
+.admin-scheduled-label {
+    margin-top: 0.35rem;
+    color: #6c7a72;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.admin-scheduled-pill {
+    margin-top: 0.2rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(24, 119, 73, 0.1);
+    color: #174c33;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+</style>

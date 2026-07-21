@@ -21,3 +21,8 @@ ALTER TABLE `customer_feedback`
 
 ALTER TABLE `customer_feedback`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+-- Mở rộng bảng contact_messages để góp ý từ contact.php hiển thị và được phản hồi tại admin_feedback.php
+ALTER TABLE `contact_messages`
+  ADD COLUMN `admin_reply` text DEFAULT NULL AFTER `message`,
+  ADD COLUMN `admin_reply_at` datetime DEFAULT NULL AFTER `admin_reply`;

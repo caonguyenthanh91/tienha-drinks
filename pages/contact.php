@@ -9,12 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $message = trim((string)($_POST['message'] ?? ''));
 
     if ($name !== '' && $phone !== '' && $message !== '') {
-        $stmt = db()->prepare('INSERT INTO contact_messages (full_name, phone, email, message, created_at) VALUES (:full_name, :phone, :email, :message, NOW())');
+        $stmt = db()->prepare('INSERT INTO contact_messages (full_name, phone, email, message, status, created_at) VALUES (:full_name, :phone, :email, :message, :status, NOW())');
         $stmt->execute([
             ':full_name' => $name,
             ':phone' => $phone,
             ':email' => $email !== '' ? $email : null,
             ':message' => $message,
+            ':status' => 'new',
         ]);
         $sent = true;
     }
@@ -24,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="text-center mb-5" data-reveal>
         <span class="section-eyebrow">Kết nối với chúng tôi</span>
         <h2 class="mb-2">Liên hệ M&T Quán</h2>
-        <p class="text-muted">Có câu hỏi hoặc muốn hợp tác? Hãy liên hệ với chúng tôi ngay.</p>
+        <p class="text-muted">Có câu hỏi hoặc muốn góp ý? Hãy liên hệ với chúng tôi ngay.</p>
     </div>
 
     <div class="row g-4">
@@ -38,15 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="mb-3">
                         <strong>Hotline</strong>
-                        <p class="text-success fw-bold mb-0">03 6816 6816</p>
+                        <p class="text-success fw-bold mb-0">03.6816.6816</p>
                     </div>
                     <div class="mb-3">
                         <strong>Email</strong>
-                        <p class="text-muted mb-0">hello@tienhadrinks.vn</p>
+                        <p class="text-muted mb-0">hatien2403@gmail.com</p>
                     </div>
                     <div>
                         <strong>Giờ mở cửa</strong>
-                        <p class="text-muted mb-0">07:00 - 22:00 (Mỗi ngày)</p>
+                        <p class="text-muted mb-0">08:00 - 16:00 (Thứ 2 - 6)</p>
                     </div>
                 </div>
             </div>
@@ -54,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-lg-7" data-reveal style="--delay: 0.1s">
             <div class="card border-0">
                 <div class="card-body">
-                    <h5 class="mb-4">✉️ Gửi yêu cầu</h5>
+                    <h5 class="mb-4">✉️ Gửi yêu cầu/ Góp ý</h5>
                     <?php if ($sent): ?>
                         <div class="alert alert-success mb-3">✓ Cảm ơn bạn! Chúng tôi sẽ phản hồi sớm nhất.</div>
                     <?php endif; ?>
@@ -72,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="email" name="email" class="form-control">
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-600">Nội dung yêu cầu</label>
+                            <label class="form-label fw-600">Nội dung yêu cầu/ Góp ý</label>
                             <textarea name="message" rows="4" class="form-control" required placeholder="Ví dụ: Đặt nước cho sự kiện..."></textarea>
                         </div>
                         <div class="col-12 d-grid d-md-flex justify-content-md-end gap-2">

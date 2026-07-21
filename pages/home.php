@@ -58,7 +58,7 @@ $features = [
                                 <?php else: ?>
                                     <a href="<?= e($banner['link']) ?>" class="btn btn-success btn-lg btn-glow"><?= e($banner['cta']) ?></a>
                                 <?php endif; ?>
-                                <a href="<?= e(app_url('index.php?page=contact')) ?>" class="btn btn-outline-light btn-lg">Đặt hàng</a>
+                                <a href="<?= e(app_url('index.php?page=products')) ?>" class="btn btn-outline-light btn-lg">Đặt hàng</a>
                             </div>
                         </div>
                     </div>
